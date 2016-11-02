@@ -1,0 +1,4 @@
+trac == 1.0.13
+psycopg2 == 2.6.2
+geoip2 == 2.4.0
+django == 1.10.3
