@@ -2,7 +2,7 @@
 from django.contrib.gis.db import models
 
 
-class CensusTracts(models.Model):
+class CensusTract(models.Model):
     geo_id = models.CharField(max_length=60)
     state = models.CharField(max_length=2)
     county = models.CharField(max_length=3)
