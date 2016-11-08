@@ -16,13 +16,19 @@ class CensusTract(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=32)
 
+    def __str__(self):
+        return self.name
+
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=128)
     location = models.PointField()
-    price = models.PositiveSmallIntegerField()
+    price = models.CharField(max_length=6)
     rating = models.FloatField()
     categories = models.ManyToManyField(Category)
+
+    def __str__(self):
+        return self.name
 
 
 class EvaluationPoint(models.Model):
