@@ -63,6 +63,18 @@ def load_yelp_businesses():
         for category in parse_categories(business.Categories):
             restaurant.categories.add(models.Category.objects.get(name=category))
 
+def load_eval_pts():
+	evalpts_df = pd.read_csv(os.path.join(BASE_DIR, 'data', 'evaluation_points.csv'))
+	for point in evalpts_df.itertuples():
+		try:
+			evalutation_point = models.EvaluationPoint(
+				location=geos.GEOSGeometry('POINT({lat} {lon})'.format(lat=float(point.latitude),
+                                                                       lon=float(point.longitude))),
+				income_level = point.score,
+				)
+			evalutation_point.save()
+		except ValueError:
+			continue
 
 def load_all_data():
     print('Loading census tracts')
@@ -71,3 +83,6 @@ def load_all_data():
     load_categories()
     print('Loading restaurants')
     load_yelp_businesses()
+    print('Loading evaluation points')
+    load_eval_pts()
+
