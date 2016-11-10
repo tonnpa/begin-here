@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.contrib.gis.utils import LayerMapping
 from django.contrib.gis import geos
 
@@ -6,7 +7,6 @@ import os
 import pandas as pd
 
 from foodmap import models
-
 
 BASE_DIR = os.path.dirname(__file__)
 
@@ -63,18 +63,40 @@ def load_yelp_businesses():
         for category in parse_categories(business.Categories):
             restaurant.categories.add(models.Category.objects.get(name=category))
 
+
 def load_eval_pts():
-	evalpts_df = pd.read_csv(os.path.join(BASE_DIR, 'data', 'evaluation_points.csv'))
-	for point in evalpts_df.itertuples():
-		try:
-			evalutation_point = models.EvaluationPoint(
-				location=geos.GEOSGeometry('POINT({lat} {lon})'.format(lat=float(point.latitude),
+    evalpts_df = pd.read_csv(os.path.join(BASE_DIR, 'data', 'evaluation_points.csv'))
+    for point in evalpts_df.itertuples():
+        try:
+            evaluation_point = models.EvaluationPoint(
+                location=geos.GEOSGeometry('POINT({lat} {lon})'.format(lat=float(point.latitude),
                                                                        lon=float(point.longitude))),
-				income_level = point.score,
-				)
-			evalutation_point.save()
-		except ValueError:
-			continue
+                income_level=point.score,
+            )
+            evaluation_point.save()
+        except ValueError:
+            continue
+
+
+def load_crimes(verbose=True):
+    crime_df = pd.read_csv(os.path.join(BASE_DIR, 'data', '2008-2015_NPU_Joined.csv'))
+    crime_df = crime_df[['Latitude', 'Longitude', 'occur_date', 'UC']].dropna()
+    for crime_record in crime_df.itertuples():
+        try:
+            crime = models.Crime(
+                location=geos.GEOSGeometry('POINT({lat} {lon})'.format(lat=float(crime_record.Latitude),
+                                                                       lon=float(crime_record.Longitude))),
+                occur_date=crime_record.occur_date,
+                category=crime_record.UC
+            )
+            crime.save()
+        except (ValueError, ValidationError):
+            print('Error at record #{}'.format(crime_record.Index))
+            continue
+        if verbose:
+            if (crime_record.Index % 10000) == 0:
+                print('Processed {} records out of {}'.format(crime_record.Index, len(crime_df)))
+
 
 def load_all_data():
     print('Loading census tracts')
@@ -85,4 +107,3 @@ def load_all_data():
     load_yelp_businesses()
     print('Loading evaluation points')
     load_eval_pts()
-

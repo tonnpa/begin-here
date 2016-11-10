@@ -34,3 +34,9 @@ class Restaurant(models.Model):
 class EvaluationPoint(models.Model):
     location = models.PointField()
     income_level = models.IntegerField()
+
+
+class Crime(models.Model):
+    location = models.PointField()
+    occur_date = models.DateField()
+    category = models.PositiveSmallIntegerField()
