@@ -19,6 +19,6 @@ from foodmap import views as foodmap_views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-
-    url(r'^$', foodmap_views.index)
+    url(r'^$', foodmap_views.index),
+    url(r'^heatmap$', foodmap_views.heatmap),
 ]

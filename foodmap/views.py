@@ -17,6 +17,6 @@ def index(request):
 
 
 def heatmap(request):
-    PtData = EvaluationPoint.objects.all()[:2000]
+    PtData = EvaluationPoint.objects.all()
     context = {'PtData': PtData}
     return render(request,'Heatmap.html',context)
