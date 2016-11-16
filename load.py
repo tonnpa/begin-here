@@ -12,25 +12,59 @@ BASE_DIR = os.path.dirname(__file__)
 
 
 def load_census_tracts(verbose=True):
-    census_tracts_mapping = {
-        'geo_id': 'GEO_ID',
-        'state': 'STATE',
-        'county': 'COUNTY',
-        'tract': 'TRACT',
+    census_tract_mapping = {
+        'statefp': 'STATEFP',
+        'countyfp': 'COUNTYFP',
+        'tractce': 'TRACTCE',
+        'geoid': 'GEOID',
         'name': 'NAME',
-        'lsad': 'LSAD',
-        'censusarea': 'CENSUSAREA',
+        'namelsad': 'NAMELSAD',
+        'mtfcc': 'MTFCC',
+        'funcstat': 'FUNCSTAT',
+        'aland': 'ALAND',
+        'awater': 'AWATER',
+        'intptlat': 'INTPTLAT',
+        'intptlon': 'INTPTLON',
         'geom': 'MULTIPOLYGON',
     }
+
     census_tracts_shp = os.path.abspath(
-        os.path.join(BASE_DIR, 'data', 'census_tracts_2010', 'gz_2010_13_140_00_500k.shp'),
+        os.path.join(BASE_DIR, 'data', 'census_tracts_2014', 'tl_2014_13_tract.shp'),
     )
 
     lm = LayerMapping(
-        models.CensusTract, census_tracts_shp, census_tracts_mapping,
+        models.CensusTract, census_tracts_shp, census_tract_mapping,
         transform=False, encoding='iso-8859-1',
     )
     lm.save(strict=True, verbose=verbose)
+
+
+def load_census_tract_incomes():
+    for county in ['atlanta', 'cobb', 'dekalb', 'fulton', 'clayton']:
+        print('Processing {}'.format(county))
+        income_df = pd.read_csv(os.path.join(BASE_DIR, 'data', 'income', 'income_' + county + '.csv'))
+        income_2014 = income_df[income_df.year == 2014]
+        for record in income_2014.itertuples():
+            geoid = record.geo.split('US')[1]
+            census_tract = models.CensusTract.objects.get(geoid=geoid)
+            try:
+                census_tract.income = int(float(record.income))
+                census_tract.save()
+            except ValueError:
+                continue
+
+
+def load_census_tract_population():
+    population_df = pd.read_csv(os.path.join(BASE_DIR, 'data', 'population', 'population_georgia.csv'))
+    for record in population_df.itertuples():
+        try:
+            census_tract = models.CensusTract.objects.get(geoid=record[2])  # 2: Id2
+            census_tract.population = record[4]                             # 4: Estimate
+            census_tract.save()
+        except models.CensusTract.DoesNotExist:
+            print('Census tract #{} does not exist'.format(record.Id2))
+        except ValueError:
+            print('No population data for #{}: {}'.format(record.Id2, record.Estimation))
 
 
 def load_categories():

@@ -3,14 +3,21 @@ from django.contrib.gis.db import models
 
 
 class CensusTract(models.Model):
-    geo_id = models.CharField(max_length=60)
-    state = models.CharField(max_length=2)
-    county = models.CharField(max_length=3)
-    tract = models.CharField(max_length=6)
-    name = models.CharField(max_length=90)
-    lsad = models.CharField(max_length=7)
-    censusarea = models.FloatField()
+    statefp = models.CharField(max_length=2)
+    countyfp = models.CharField(max_length=3)
+    tractce = models.CharField(max_length=6)
+    geoid = models.CharField(max_length=11)
+    name = models.CharField(max_length=7)
+    namelsad = models.CharField(max_length=20)
+    mtfcc = models.CharField(max_length=5)
+    funcstat = models.CharField(max_length=1)
+    aland = models.FloatField()
+    awater = models.FloatField()
+    intptlat = models.CharField(max_length=11)
+    intptlon = models.CharField(max_length=12)
     geom = models.MultiPolygonField(srid=4269)
+    income = models.IntegerField(null=True)
+    population = models.IntegerField(null=True)
 
 
 class Category(models.Model):

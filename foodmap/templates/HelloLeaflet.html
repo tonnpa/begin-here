@@ -181,46 +181,6 @@
         }
     }).addTo(map);
 
-    {#    var layers = [];#}
-    {#    {% for restaurant in restaurant_list %}#}
-    {#        var latitude = {{ restaurant.location.x }};#}
-    {#        var longitude = {{ restaurant.location.y }};#}
-    {#        var layer = L.marker([latitude, longitude]);#}
-    {#        layers.push(layer);#}
-    {#        layer.addTo(map);#}
-    {#    {% endfor %}#}
-    {##}
-    {#    $("input[name=pricerange]").change(function () {#}
-    {#        console.log("change");#}
-    {#        map.removeLayer(atl);#}
-    {#        var $unchecked = $("input[name=pricerange]:not(:checked)");#}
-    {#        var $checked = $("input[name=pricerange]:checked");#}
-    {#        if ($unchecked.length == $checked.length + $unchecked.length) {#}
-    {#            layers.forEach(function (layer) {#}
-    {#                map.addLayer(layer);#}
-    {#            });#}
-    {#        }#}
-    {#        else {#}
-    {#            $unchecked.each(function (_, category) {#}
-    {#                layers.forEach()#}
-    {##}
-    {#                restaurantMarkers.forEach(function (marker) {#}
-    {#                    if (marker.price == category.value) {#}
-    {#                        marker.setVisible(false);#}
-    {#                    }#}
-    {#                });#}
-    {#            });#}
-    {#            $checked.each(function (_, category) {#}
-    {#                restaurantMarkers.forEach(function (marker) {#}
-    {#                    if (marker.price == category.value) {#}
-    {#                        marker.setVisible(true);#}
-    {#                    }#}
-    {#                });#}
-    {#            });#}
-    {#        }#}
-    {#    })#}
 </script>
-
-
 </body>
 </html>
