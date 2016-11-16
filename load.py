@@ -106,8 +106,10 @@ def load_eval_pts():
                 location=geos.GEOSGeometry('POINT({lat} {lon})'.format(lat=float(point.latitude),
                                                                        lon=float(point.longitude))),
                 income_level=point.score,
+                poly_pts = geos.GEOSGeometry('{{ "type": "Polygon", "coordinates": [{coords}]}}'.format(coords=eval(point.poly_pts)))
             )
             evaluation_point.save()
+            # print('{{ "type": "Polygon", "coordinates": [{coords}]}}'.format(coords=eval(point.poly_pts)))
         except ValueError:
             continue
 
