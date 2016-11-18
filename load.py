@@ -106,10 +106,10 @@ def load_eval_pts():
                 location=geos.GEOSGeometry('POINT({lat} {lon})'.format(lat=float(point.latitude),
                                                                        lon=float(point.longitude))),
                 income_level=point.score,
-                poly_pts = geos.GEOSGeometry('{{ "type": "Polygon", "coordinates": [{coords}]}}'.format(coords=eval(point.poly_pts)))
+                poly_pts = geos.GEOSGeometry('{{\'type\': \'Polygon\', \'coordinates\': [{coords}]}}'.format(coords=eval(point.jsonpoly_pts)))
             )
             evaluation_point.save()
-            # print('{{ "type": "Polygon", "coordinates": [{coords}]}}'.format(coords=eval(point.poly_pts)))
+            #print('{{ "type": "Polygon", "coordinates": [{coords}] }}'.format(coords=eval(point.poly_pts)))
         except ValueError:
             continue
 
@@ -137,6 +137,10 @@ def load_crimes(verbose=True):
 def load_all_data():
     print('Loading census tracts')
     load_census_tracts()
+    print('Loading census tract income')
+    load_census_tract_incomes()
+    print('Loading census tract population')
+    load_census_tract_population()
     print('Loading categories')
     load_categories()
     print('Loading restaurants')

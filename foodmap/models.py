@@ -39,7 +39,7 @@ class Restaurant(models.Model):
 class EvaluationPoint(models.Model):
     location = models.PointField()
     income_level = models.IntegerField()
-    poly_pts=models.PolygonField()
+    poly_pts = models.PolygonField(null=True)
 
 class Crime(models.Model):
     location = models.PointField()
