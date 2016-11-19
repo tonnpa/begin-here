@@ -74,7 +74,7 @@ def load_categories():
         category_object.save()
 
 
-def load_yelp_businesses():
+def load_restaurants():
     def parse_categories(category_string):
         return json.loads(category_string.replace('\'', "\""))
 
@@ -85,7 +85,7 @@ def load_yelp_businesses():
         try:
             restaurant = models.Restaurant(
                 name=business.name,
-                location=geos.GEOSGeometry('POINT({lat} {lon})'.format(lat=float(business.latitude),
+                location=geos.GEOSGeometry('POINT({lon} {lat})'.format(lat=float(business.latitude),
                                                                        lon=float(business.longitude))),
                 price=business.Price,
                 rating=business.rating,
@@ -144,6 +144,6 @@ def load_all_data():
     print('Loading categories')
     load_categories()
     print('Loading restaurants')
-    load_yelp_businesses()
+    load_restaurants()
     print('Loading evaluation points')
     load_eval_pts()

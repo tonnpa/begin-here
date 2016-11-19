@@ -1,5 +1,5 @@
-# This is an auto-generated Django model module created by ogrinspect.
 from django.contrib.gis.db import models
+
 
 class CensusTract(models.Model):
     statefp = models.CharField(max_length=2)
@@ -36,10 +36,12 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
 
+
 class EvaluationPoint(models.Model):
     location = models.PointField()
     income_level = models.IntegerField()
     poly_pts = models.PolygonField(null=True)
+
 
 class Crime(models.Model):
     location = models.PointField()

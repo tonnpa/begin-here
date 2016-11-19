@@ -10,134 +10,84 @@
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"
             integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
             crossorigin="anonymous"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
     <style>
         #map {
-            height: 500px;
-            width: 960px;
-            float: left;
-            overflow: hidden;
+            height: 100%;
+            border: 2px solid darkseagreen;
         }
 
         html, body {
-            margin: 0;
             height: 100%;
-            padding: 0;
         }
 
-        #FilterPanel {
-            height: 100%;
-            margin-left: 80%;
-            width: 20%;
-            overflow: hidden;
-            background-color: lavender;
-        }
-
-        #FilterTableContainer {
-            width: 100%;
-            padding-left: 20%;
-            padding-right: 20%;
-        }
-
-        #FilterTitle {
-            text-align: center;
-            padding: 10%;
-            font-size: 120%;
-        }
-
-        #CatControl-label {
-            text-align: center;
-            width: 100%;
-            margin-bottom: 1%;
-        }
-
-        #CategorySelector {
+        .input-group-addon {
+            min-width: 15em;
             text-align: right;
-            width: 80%;
-            margin-bottom: 7%;
-        }
-
-        th, td {
-            text-align: left;
         }
     </style>
 </head>
 <body>
 
-<div id="map"></div>
-<div id="FilterPanel">
-    <!--element that holds the interactive filters for the map-->
-    <div id="FilterTitle">
-        <text> Interactive Market Explorer</text>
-    </div>
+<div class="container-fluid" style="height: 100%">
+    <div class="row" style="height: 100%">
+        <div class="col-md-8" style="height: 100%">
+            <div id="map"></div>
+        </div>
+        <div class="col-md-4" style="height: 100%; border: solid darkseagreen">
+            <h2> Interactive Market Explorer</h2>
+            <h3> Price range </h3>
+            <div class="input-group">
+                <div class="span4">
+                    <span class="input-group-addon">
+                        <label for="pr1">Inexpensive $</label>
+                        <input type="checkbox" name="pricerange" value="$" id="pr1">
+                    </span>
+                </div>
+                <div class="span4">
+                    <span class="input-group-addon">
+                        <label for="pr2">Moderate $$</label>
+                        <input type="checkbox" name="pricerange" value="$$" id="pr2">
+                    </span>
+                </div>
+                <div class="span4">
+                    <span class="input-group-addon">
+                        <label for="pr3">Pricey $$$</label>
+                        <input type="checkbox" name="pricerange" value="$$$" id="pr3">
+                    </span>
+                </div>
+                <div class="span4">
+                    <span class="input-group-addon">
+                        <label for="pr4">Ultra High-End $$$$</label>
+                        <input type="checkbox" name="pricerange" value="$$$$" id="pr4">
+                    </span>
+                </div>
+                <div class="span4">
+                    <span class="input-group-addon">
+                        <label for="pr5">Not Available</label>
+                        <input type="checkbox" name="pricerange" value="n/a" id="pr5">
+                    </span>
+                </div>
+            </div>
 
-    <!-- Create the dropdown selector to filter restaurant categories-->
-    <div id="CatControl-label">
-        <text>Restaurant Category/Cuisine</text>
-    </div>
-    <div id="CategorySelector"><select multiple id="CategorySelector">
-        {% for category in category_list %}
-            <option value="{{ category.name }}">{{ category.name }}</option>
-        {% endfor %}
-    </select>
-    </div>
-    <div id=FilterTableContainer>
-        <table id="FilterTable" align="left">
-            <!-- Create the filter checkboxes for restaurant price-range-->
-            <tr>
-                <td><label class="checkbox-title">Price</label></td>
-                <td><label class="checkbox-title">Rating</label></td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" name="pricerange" value="$">
-                            $
-                        </label>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" name="pricerange" value="$$">
-                            $$
-                        </label>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" name="pricerange" value="$$$">
-                            $$$
-                        </label>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" name="pricerange" value="$$$$">
-                            $$$$
-                        </label>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" name="pricerange" value="n/a">
-                            n/a
-                        </label>
-                    </div>
-                </td>
-            </tr>
-        </table>
+            <h3>Rating</h3>
+            <input type="range" id="rating" min="1" max="5" value="1">
+
+            <h3>Restaurant Category/Cuisine</h3>
+            <div class="span4">
+                <select id="cuisines" style="width:300px" multiple="multiple"></select>
+            </div>
+            <br>
+            <div class="span4 center-block">
+                <button type="button" class="btn btn-primary center-block" style="width: 100%" onclick="filter()">
+                    Filter
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -148,24 +98,6 @@
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    function getRestaurants() {
-        return {
-            type: "FeatureCollection",
-            features: [
-                {% for restaurant in restaurant_list %}
-                    {
-                        type: "Feature",
-                        id: {{ restaurant.id }},
-                        geometry: {
-                            type: "Point",
-                            coordinates: [{{ restaurant.location.y }}, {{ restaurant.location.x }}]
-                        }
-                    },
-                {% endfor %}
-            ]
-        };
-    }
-
     var geojsonMarkerOptions = {
         radius: 5,
         fillColor: "teal",
@@ -175,12 +107,63 @@
         fillOpacity: 0.1
     };
 
-    L.geoJSON(getRestaurants(), {
-        pointToLayer: function (feature, latlng) {
-            return L.circleMarker(latlng, geojsonMarkerOptions);
+    var restaurants, allRestaurantLayer, currentLayer;
+    $.get('/restaurants').done(function (data) {
+        restaurants = data;
+        allRestaurantLayer = L.geoJSON(restaurants, {
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, geojsonMarkerOptions);
+            }
+        });
+        currentLayer = allRestaurantLayer;
+        currentLayer.addTo(map);
+        console.log(restaurants);
+    });
+
+    function filter() {
+        map.removeLayer(currentLayer);
+        var selectedPriceCategories = getSelectedPriceCategories();
+        currentLayer = L.geoJSON(restaurants, {
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, geojsonMarkerOptions);
+            },
+            filter: function (feature, _) {
+                var matchPrice = selectedPriceCategories[feature.properties.price];
+                var matchRating = feature.properties.rating >= $("#rating").val();
+                return matchPrice && matchRating;
+            }
+        });
+
+        currentLayer.addTo(map);
+    }
+
+    function getSelectedPriceCategories() {
+        var $checked = $("input[name=pricerange]:checked");
+        var $unchecked = $("input[name=pricerange]:not(:checked)");
+        var visibility = {};
+        $checked.each(function (_, category) {
+            visibility[category.value] = true;
+        });
+        $unchecked.each(function (_, category) {
+            visibility[category.value] = false;
+        });
+        return visibility;
+    }
+
+    $.get('/categories').done(function (data) {
+        var $cuisines = $('#cuisines');
+        $cuisines.select2();
+
+        for (var region in data) {
+            var $region = $("<optgroup label=\"" + region + "\"></optgroup>");
+            $cuisines.append($region);
+            data[region].forEach(function (category) {
+                $region.append("<option value=\"" + category + "\">" + category + "</option>");
+            });
         }
-    }).addTo(map);
+    });
 
 </script>
+
 </body>
 </html>
