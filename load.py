@@ -59,7 +59,7 @@ def load_census_tract_population():
     for record in population_df.itertuples():
         try:
             census_tract = models.CensusTract.objects.get(geoid=record[2])  # 2: Id2
-            census_tract.population = record[4]                             # 4: Estimate
+            census_tract.population = record[4]  # 4: Estimate
             census_tract.save()
         except models.CensusTract.DoesNotExist:
             print('Census tract #{} does not exist'.format(record.Id2))
@@ -105,19 +105,23 @@ def load_eval_pts():
             evaluation_point = models.EvaluationPoint(
                 location=geos.GEOSGeometry('POINT({lon} {lat})'.format(lat=float(point.latitude),
                                                                        lon=float(point.longitude))),
-                income_level=point.score,
-                poly_pts = geos.GEOSGeometry('{{\'type\': \'Polygon\', \'coordinates\': [{coords}]}}'.format(coords=eval(point.jsonpoly_pts))),
-                bigpoly_pts = geos.GEOSGeometry('{{\'type\': \'Polygon\', \'coordinates\': [{coords}]}}'.format(coords=eval(point.bigjsonpoly_pts)))
+                favorability_score=point.score,
+                poly_pts=geos.GEOSGeometry(
+                    '{{\'type\': \'Polygon\', \'coordinates\': [{coords}]}}'.format(coords=eval(point.jsonpoly_pts))),
+                bigpoly_pts=geos.GEOSGeometry(
+                    '{{\'type\': \'Polygon\', \'coordinates\': [{coords}]}}'.format(coords=eval(point.bigjsonpoly_pts)))
             )
             evaluation_point.save()
-            #print('{{ "type": "Polygon", "coordinates": [{coords}] }}'.format(coords=eval(point.poly_pts)))
         except ValueError:
             continue
 
 
-def load_crimes(verbose=True):
+def load_crimes(verbose=True, limit=None):
     crime_df = pd.read_csv(os.path.join(BASE_DIR, 'data', '2008-2015_NPU_Joined.csv'))
     crime_df = crime_df[['Latitude', 'Longitude', 'occur_date', 'UC']].dropna()
+    if limit:
+        crime_df = crime_df[:limit]
+
     for crime_record in crime_df.itertuples():
         try:
             crime = models.Crime(
@@ -133,4 +137,3 @@ def load_crimes(verbose=True):
         if verbose:
             if (crime_record.Index % 10000) == 0:
                 print('Processed {} records out of {}'.format(crime_record.Index, len(crime_df)))
-

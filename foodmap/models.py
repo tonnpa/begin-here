@@ -15,10 +15,11 @@ class CensusTract(models.Model):
     intptlat = models.CharField(max_length=11)
     intptlon = models.CharField(max_length=12)
     geom = models.MultiPolygonField(srid=4269)
-    income = models.IntegerField(null=True)
-    population = models.IntegerField(null=True)
-    # number of evaluation points
-    #
+
+    income = models.PositiveIntegerField(null=True)
+    population = models.PositiveIntegerField(null=True)
+    no_eval_pts = models.PositiveSmallIntegerField(null=True)
+    pop_density = models.FloatField(null=True)
 
 
 class Category(models.Model):
@@ -41,13 +42,10 @@ class Restaurant(models.Model):
 
 class EvaluationPoint(models.Model):
     location = models.PointField(srid=4269)
-    income_level = models.IntegerField()
     poly_pts = models.PolygonField(srid=4269)
     bigpoly_pts = models.PolygonField(srid=4269)
-    # New Attribute = 1)return geoID of census block
-    # 2) assign income level from that census block to new attribute
-
-
+    favorability_score = models.FloatField()
+    ct_geoid = models.CharField(max_length=11)
 
 
 class Crime(models.Model):
