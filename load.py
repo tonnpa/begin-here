@@ -103,10 +103,11 @@ def load_eval_pts():
     for point in evalpts_df.itertuples():
         try:
             evaluation_point = models.EvaluationPoint(
-                location=geos.GEOSGeometry('POINT({lat} {lon})'.format(lat=float(point.latitude),
+                location=geos.GEOSGeometry('POINT({lon} {lat})'.format(lat=float(point.latitude),
                                                                        lon=float(point.longitude))),
                 income_level=point.score,
-                poly_pts = geos.GEOSGeometry('{{\'type\': \'Polygon\', \'coordinates\': [{coords}]}}'.format(coords=eval(point.jsonpoly_pts)))
+                poly_pts = geos.GEOSGeometry('{{\'type\': \'Polygon\', \'coordinates\': [{coords}]}}'.format(coords=eval(point.jsonpoly_pts))),
+                bigpoly_pts = geos.GEOSGeometry('{{\'type\': \'Polygon\', \'coordinates\': [{coords}]}}'.format(coords=eval(point.bigjsonpoly_pts)))
             )
             evaluation_point.save()
             #print('{{ "type": "Polygon", "coordinates": [{coords}] }}'.format(coords=eval(point.poly_pts)))
@@ -120,7 +121,7 @@ def load_crimes(verbose=True):
     for crime_record in crime_df.itertuples():
         try:
             crime = models.Crime(
-                location=geos.GEOSGeometry('POINT({lat} {lon})'.format(lat=float(crime_record.Latitude),
+                location=geos.GEOSGeometry('POINT({lon} {lat})'.format(lat=float(crime_record.Latitude),
                                                                        lon=float(crime_record.Longitude))),
                 occur_date=crime_record.occur_date,
                 category=crime_record.UC
@@ -133,17 +134,3 @@ def load_crimes(verbose=True):
             if (crime_record.Index % 10000) == 0:
                 print('Processed {} records out of {}'.format(crime_record.Index, len(crime_df)))
 
-
-def load_all_data():
-    print('Loading census tracts')
-    load_census_tracts()
-    print('Loading census tract income')
-    load_census_tract_incomes()
-    print('Loading census tract population')
-    load_census_tract_population()
-    print('Loading categories')
-    load_categories()
-    print('Loading restaurants')
-    load_restaurants()
-    print('Loading evaluation points')
-    load_eval_pts()
