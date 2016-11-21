@@ -52,9 +52,9 @@ def heatmap(request):
 
 
 def evalgrids_view(request):
-    evalgrids_as_geojson = serialize('geojson', EvaluationPoint.objects.all()[:1],
+    evalgrids_as_geojson = serialize('geojson', EvaluationPoint.objects.all(),
                                      geometry_field='poly_pts',
-                                     fields=('income_level',))
+                                     fields=('income','population', 'crime_count_local', 'crime_count_neighborhood','favorability_score'))
     return HttpResponse(evalgrids_as_geojson, content_type='application/json')
 
 
