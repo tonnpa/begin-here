@@ -46,20 +46,47 @@ DELETE FROM foodmap_censustract WHERE no_eval_pts IS NULL;
 
 
 ## Update EvaluationPoints with population and income from CensusTracts
-
 UPDATE foodmap_evaluationpoint
 	SET population = pop_density,
 		income = income
 	FROM foodmap_censustract WHERE foodmap_censustract.geoid = foodmap_evaluationpoint.ct_geoid;
 
 
+## Count local crimes
+UPDATE foodmap_evaluationpoint
+	SET crime_count_local = Q.counter
+	FROM
+		(
+			SELECT  B.id, count(*) as counter
+			FROM (
+				SELECT location
+				FROM foodmap_crime
+				) AS A 
+			LEFT JOIN (
+				SELECT id, poly_pts
+				FROM foodmap_evaluationpoint
+				) AS B
+			ON  ST_Contains(B.poly_pts, A.location)
+			GROUP BY B.id
+		) AS Q
+	WHERE foodmap_evaluationpoint.id = Q.id;
 
-### MODIFY THIS TO CALCULATE CRIMES
 
-SELECT foodmap_censustract.geoid, count(*)
-	FROM foodmap_evaluationpoint, foodmap_censustract
-	WHERE ST_DWithin(geography(location), geography(geom), 1)
-	GROUP BY geoid
-	LIMIT 10;
-
-
+## Count neighborhood crimes
+UPDATE foodmap_evaluationpoint
+	SET crime_count_neighborhood = Q.counter
+	FROM
+		(
+			SELECT  B.id, count(*) as counter
+			FROM (
+				SELECT location
+				FROM foodmap_crime
+				) AS A 
+			LEFT JOIN (
+				SELECT id, bigpoly_pts
+				FROM foodmap_evaluationpoint
+				) AS B
+			ON  ST_Contains(B.bigpoly_pts, A.location)
+			GROUP BY B.id
+		) AS Q
+	WHERE foodmap_evaluationpoint.id = Q.id;
