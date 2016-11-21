@@ -35,6 +35,7 @@ class Restaurant(models.Model):
     price = models.CharField(max_length=6)
     rating = models.FloatField()
     categories = models.ManyToManyField(Category)
+    eval_pt_id = models.PositiveIntegerField(null=True)
 
     def __str__(self):
         return self.name

@@ -90,3 +90,22 @@ UPDATE foodmap_evaluationpoint
 			GROUP BY B.id
 		) AS Q
 	WHERE foodmap_evaluationpoint.id = Q.id;
+
+
+## 
+UPDATE foodmap_restaurant
+	SET eval_pt_id = Q.id
+	FROM
+		(
+			SELECT  B.id, B.rest_id
+			FROM (
+				SELECT location, id as rest_id
+				FROM foodmap_restaurant
+				) AS A 
+			LEFT JOIN (
+				SELECT id, poly_pts
+				FROM foodmap_evaluationpoint
+				) AS B
+			ON  ST_Contains(B.poly_pts, A.location)
+		) AS Q
+	WHERE foodmap_restaurant.id=Q.rest_id;

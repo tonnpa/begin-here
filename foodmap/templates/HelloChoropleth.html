@@ -30,48 +30,8 @@
 <body>
 <div id="map-canvas"></div>
 <script>
-    //  Import or construct the geoJSON for each evaluation grid (NOTE the order
-    //  of the coordinates is is [Long, Lat] and NOT [Lat, Lo
-
-    {#var newdata = [{{ data }}];#}
-
-
-    {#console.log(newdata);#}
-
-
-    {#var mypols = {"type": "FeatureCollection", "crs": {"type": "name", "properties": {"name": "EPSG:4326"}}, "features": [{"geometry": {"type": "Polygon", "coordinates": [[[-84.51139423076924, 33.59859649122807], [-84.51139423076924, 33.60140350877193], [-84.50860576923077, 33.60140350877193], [-84.50860576923077, 33.59859649122807], [-84.51139423076924, 33.59859649122807]]]}, "type": "Feature", "properties": {"income_level": 30}}, {"geometry": {"type": "Polygon", "coordinates": [[[-84.50860576923077, 33.59859649122807], [-84.50860576923077, 33.60140350877193], [-84.50581730769233, 33.60140350877193], [-84.50581730769233, 33.59859649122807], [-84.50860576923077, 33.59859649122807]]]}, "type": "Feature", "properties": {"income_level": 30}}, {"geometry": {"type": "Polygon", "coordinates": [[[-84.5058173076923, 33.59859649122807], [-84.5058173076923, 33.60140350877193], [-84.50302884615385, 33.60140350877193], [-84.50302884615385, 33.59859649122807], [-84.5058173076923, 33.59859649122807]]]}, "type": "Feature", "properties": {"income_level": 30}}, {"geometry": {"type": "Polygon", "coordinates": [[[-84.50302884615385, 33.59859649122807], [-84.50302884615385, 33.60140350877193], [-84.50024038461538, 33.60140350877193], [-84.50024038461538, 33.59859649122807], [-84.50302884615385, 33.59859649122807]]]}, "type": "Feature", "properties": {"income_level": 30}}, {"geometry": {"type": "Polygon", "coordinates": [[[-84.50024038461538, 33.59859649122807], [-84.50024038461538, 33.60140350877193], [-84.49745192307694, 33.60140350877193], [-84.49745192307694, 33.59859649122807], [-84.50024038461538, 33.59859649122807]]]}, "type": "Feature", "properties": {"income_level": 30}}]};#}
-    {#var mypols = [{#}
-    {#    "type": "Feature",#}
-    {#    "properties": {"income_level": 10},#}
-    {#    "geometry": {#}
-    {#        "type": "Polygon",#}
-    {#        "coordinates": [[#}
-    {#            [-84.5825, 33.519999999999996],#}
-    {#            [-84.5825, 33.680000000000007],#}
-    {#            [-84.4375, 33.680000000000007],#}
-    {#            [-84.4375, 33.519999999999996],#}
-    {#            [-84.5825, 33.519999999999996]#}
-    {#        ]]#}
-    {#    }#}
-    {#, #}
-    {#        "type": "Feature",#}
-    {#        "properties": {"income_level": 120},#}
-    {#        "geometry": {#}
-    {#            "type": "Polygon",#}
-    {#            "coordinates": [[#}
-    {#                [-84.4375, 33.519999999999996],#}
-    {#                [-84.4375, 33.680000000000007],#}
-    {#                [-84.2925, 33.680000000000007],#}
-    {#                [-84.2925, 33.519999999999996],#}
-    {#                [-84.4375, 33.519999999999996]#}
-    {#            ]]#}
-    {#        }#}
-    {#    }];#}
-
-    // 9 colors
+    // 9 colors from color brewer
     var colors = ['#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026', '#800026']
-
-
 
     function getColor(d) {
         return d > 90 ? colors[8] :
@@ -85,12 +45,19 @@
                                                                         colors[0];
     }
 
+    function getOpacity(d) {
+        opacity = d/100.0;
+        if (opacity > 0.6)
+            return 0.6;
+        return opacity;
+    }
+
     function gridstyle(feature) {
         return {
             color: getColor(feature.properties.crime_count_local),
             weight: 0,
             opacity: 1,
-            fillOpacity: 0.7
+            fillOpacity: getOpacity(feature.properties.crime_count_local)
         };
     }
 
