@@ -21,77 +21,6 @@ def index(request):
     return render(request, 'index.html', context)
 
 
-def get_categories(request):
-    categories = {'African': ['south african', 'senegalese'],
-                  'Asian': ['ramen',
-                            'himalayan',
-                            'mongolian',
-                            'noodles',
-                            'szechuan',
-                            'cantonese',
-                            'dimsum',
-                            'mediterranean',
-                            'japanese',
-                            'pakistani',
-                            'taiwanese',
-                            'burmese',
-                            'korean',
-                            'indonesian',
-                            'sushi',
-                            'loatian',
-                            'indpak',
-                            'bangladeshi',
-                            'malaysian',
-                            'chinese',
-                            'vietnamese'],
-                  'European': ['italian',
-                               'greek',
-                               'creperies',
-                               'hungarian',
-                               'scandanavian',
-                               'tapas',
-                               'german',
-                               'irish',
-                               'russian',
-                               'belgian',
-                               'spanish',
-                               'french',
-                               'british',
-                               'ethiopian'],
-                  'Fast Food': ['burgers',
-                                'cafes',
-                                'pizza',
-                                'hotdogs',
-                                'chicken_wings',
-                                'tacos',
-                                'sandwiches',
-                                'hotdog',
-                                'falafel',
-                                'donuts',
-                                'waffles'],
-                  'Latin American': ['mexican',
-                                     'latin',
-                                     'caribbean',
-                                     'puertorican',
-                                     'dominican',
-                                     'cuban',
-                                     'north american',
-                                     'hawaiian'],
-                  'Middle-East': ['lebanese', 'persian', 'turkish', 'moroccan'],
-                  'South American': ['brazilian',
-                                     'southern',
-                                     'venezuelan',
-                                     'columbian',
-                                     'peruvian']}
-
-    return HttpResponse(json.dumps(categories), content_type="application/json")
-
-
-def get_restaurants(request):
-    restaurants = serialize('geojson', Restaurant.objects.all())
-    return HttpResponse(restaurants, content_type='application/json')
-
-
 def heatmap(request):
     PtData = EvaluationPoint.objects.all()
     context = {'PtData': PtData}
@@ -101,7 +30,8 @@ def heatmap(request):
 def evalgrids_view(request):
     evalgrids_as_geojson = serialize('geojson', EvaluationPoint.objects.all(),
                                      geometry_field='poly_pts',
-                                     fields=('income','population', 'crime_count_local', 'crime_count_neighborhood','favorability_score'))
+                                     fields=('income', 'population', 'crime_count_local', 'crime_count_neighborhood',
+                                             'favorability_score'))
     return HttpResponse(evalgrids_as_geojson, content_type='application/json')
 
 
@@ -114,3 +44,93 @@ def highlight(request):
     data = json.loads(request.body.decode("utf-8"))
     logging.error(data.keys())
     return HttpResponse("Hello")
+
+
+def get_restaurants(request):
+    restaurants = serialize('geojson', Restaurant.objects.all())
+    return HttpResponse(restaurants, content_type='application/json')
+
+
+def get_categories(request):
+    logging.error('')
+    categories = {
+        "African": [
+            "senegalese",
+            "southafrican"
+        ],
+        "Asian": [
+            "bangladeshi",
+            "burmese",
+            "cantonese",
+            "chinese",
+            "dimsum",
+            "himalayan",
+            "indonesian",
+            "indpak",
+            "japanese",
+            "korean",
+            "laotian",
+            "malaysian",
+            "mediterranean",
+            "mongolian",
+            "noodles",
+            "pakistani",
+            "ramen",
+            "sushi",
+            "szechuan",
+            "taiwanese",
+            "vietnamese"
+        ],
+        "European": [
+            "belgian",
+            "british",
+            "creperies",
+            "ethiopian",
+            "french",
+            "german",
+            "greek",
+            "hungarian",
+            "irish",
+            "italian",
+            "russian",
+            "scandinavian",
+            "spanish",
+            "tapas"
+        ],
+        "Fast Food": [
+            "burgers",
+            "cafes",
+            "chicken_wings",
+            "donuts",
+            "falafel",
+            "hotdog",
+            "hotdogs",
+            "pizza",
+            "sandwiches",
+            "tacos",
+            "waffles"
+        ],
+        "Latin American": [
+            "caribbean",
+            "cuban",
+            "dominican",
+            "hawaiian",
+            "latin",
+            "mexican",
+            "puertorican"
+        ],
+        "Middle-East": [
+            "lebanese",
+            "moroccan",
+            "persian",
+            "turkish"
+        ],
+        "South American": [
+            "brazilian",
+            "colombian",
+            "peruvian",
+            "southern",
+            "venezuelan"
+        ]
+    }
+    return HttpResponse(json.dumps(categories), content_type='application/json')

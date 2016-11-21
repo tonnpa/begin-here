@@ -114,7 +114,8 @@
                     </div>
                 </div>
                 <div class="span4 center-block">
-                    <button type="button" class="btn btn-success center-block" style="width: 100%" onclick="highlight(this)">
+                    <button type="button" class="btn btn-success center-block" style="width: 100%"
+                            onclick="highlight(this)">
                         Highlight locations
                     </button>
                 </div>
@@ -144,17 +145,17 @@
             fillOpacity: 0.1
         };
 
-{#        $.get('/restaurants').done(function (data) {#}
-{#            restaurants = data;#}
-{#            allRestaurantLayer = L.geoJSON(restaurants, {#}
-{#                pointToLayer: function (feature, latlng) {#}
-{#                    return L.circleMarker(latlng, geojsonMarkerOptions);#}
-{#                }#}
-{#            });#}
-{#            currentLayer = allRestaurantLayer;#}
-{#            currentLayer.addTo(map);#}
-{#            console.log(restaurants);#}
-{#        });#}
+        {#        $.get('/restaurants').done(function (data) {#}
+        {#            restaurants = data;#}
+        {#            allRestaurantLayer = L.geoJSON(restaurants, {#}
+        {#                pointToLayer: function (feature, latlng) {#}
+        {#                    return L.circleMarker(latlng, geojsonMarkerOptions);#}
+        {#                }#}
+        {#            });#}
+        {#            currentLayer = allRestaurantLayer;#}
+        {#            currentLayer.addTo(map);#}
+        {#            console.log(restaurants);#}
+        {#        });#}
 
         $.get('/categories').done(function (data) {
             var $cuisines = $('#cuisines');
@@ -183,6 +184,23 @@
         return visibility;
     }
 
+    function getPrices() {
+        var prices = [];
+        var $checked = $("input[name=pricerange]:checked");
+        $checked.each(function (_, category) {
+            prices.push(category.value);
+        });
+        return prices;
+    }
+
+    function getRating() {
+        return $("#rating").val();
+    }
+
+    function getSelectedCuisines() {
+        return $("#cuisines").val();
+    }
+
     function filter() {
         map.removeLayer(currentLayer);
         var selectedPriceCategories = getSelectedPriceCategories();
@@ -201,18 +219,31 @@
     }
 
     function highlight(element) {
-        var $form = $(element).closest("form");
-        var priorities = {
-            partner: $form.find("#weight_partners").val(),
-            population: $form.find("#weight_population").val(),
-            income: $form.find("#weight_income").val(),
-            crime: $form.find("#weight_crime").val()
-        };
+        function get_priorities() {
+            return {
+                partner: $form.find("#weight_partners").val(),
+                population: $form.find("#weight_population").val(),
+                income: $form.find("#weight_income").val(),
+                crime: $form.find("#weight_crime").val()
+            };
+        }
 
+        function get_filters() {
+            return {
+                price: getPrices(),
+                rating: getRating(),
+                categories: getSelectedCuisines()
+            };
+        }
+
+        var $form = $(element).closest("form");
         $.post({
             url: '/highlight',
             contentType: 'application/json',
-            data: JSON.stringify(priorities)
+            data: JSON.stringify({
+                priority: get_priorities(),
+                filter: get_filters()
+            })
         });
     }
 
