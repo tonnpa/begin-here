@@ -16,7 +16,7 @@ def index(request):
     context = {
         'restaurant_list': restaurants,
     }
-    return render(request, 'HelloLeaflet.html', context)
+    return render(request, 'index.html', context)
 
 
 def get_categories(request):
@@ -104,4 +104,4 @@ def evalgrids_view(request):
 
 
 def choropleth(request):
-    return render(request, 'HelloChoropleth.html')
+    return render(request, 'choropleth.html')
