@@ -46,6 +46,9 @@ class EvaluationPoint(models.Model):
     bigpoly_pts = models.PolygonField(srid=4269)
     favorability_score = models.FloatField()
     ct_geoid = models.CharField(max_length=11)
+    population = models.FloatField(null=True)
+    income = models.PositiveIntegerField(null=True)
+    crimecount = models.PositiveIntegerField(null=True)
 
 
 class Crime(models.Model):
