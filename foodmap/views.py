@@ -1,6 +1,8 @@
 import json
+import logging
 
-from foodmap.models import Category
+from django.views.decorators.csrf import csrf_exempt
+
 from foodmap.models import Restaurant
 from django.shortcuts import render
 from .models import EvaluationPoint
@@ -82,7 +84,7 @@ def get_categories(request):
                                      'columbian',
                                      'peruvian']}
 
-    return HttpResponse(json.dumps(categories), content_type="application/json");
+    return HttpResponse(json.dumps(categories), content_type="application/json")
 
 
 def get_restaurants(request):
@@ -93,7 +95,7 @@ def get_restaurants(request):
 def heatmap(request):
     PtData = EvaluationPoint.objects.all()
     context = {'PtData': PtData}
-    return render(request, 'Heatmap.html', context)
+    return render(request, 'heatmap.html', context)
 
 
 def evalgrids_view(request):
@@ -105,3 +107,10 @@ def evalgrids_view(request):
 
 def choropleth(request):
     return render(request, 'choropleth.html')
+
+
+@csrf_exempt
+def highlight(request):
+    data = json.loads(request.body.decode("utf-8"))
+    logging.error(data.keys())
+    return HttpResponse("Hello")

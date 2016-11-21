@@ -92,12 +92,12 @@ UPDATE foodmap_evaluationpoint
 	WHERE foodmap_evaluationpoint.id = Q.id;
 
 
-## 
+## Add evaluation point ID to the restaurants
 UPDATE foodmap_restaurant
 	SET eval_pt_id = Q.id
 	FROM
 		(
-			SELECT  B.id, B.rest_id
+			SELECT  B.id, A.rest_id
 			FROM (
 				SELECT location, id as rest_id
 				FROM foodmap_restaurant

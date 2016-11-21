@@ -25,4 +25,5 @@ urlpatterns = [
     url(r'^choropleth/data', foodmap_views.evalgrids_view), # The GeoJson evaluation grid data
     url(r'^categories$', foodmap_views.get_categories),
     url(r'^restaurants$', foodmap_views.get_restaurants),
+    url(r'^highlight$', foodmap_views.highlight)
 ]

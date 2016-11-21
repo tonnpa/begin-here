@@ -38,7 +38,7 @@
         <div class="col-md-8" style="height: 100%">
             <div id="map"></div>
         </div>
-        <div class="col-md-4" style="height: 100%; border: solid darkseagreen">
+        <div class="col-md-4" style="height: 100%">
             <h2> Interactive Market Explorer</h2>
             <h3> Price range </h3>
             <div class="input-group">
@@ -87,39 +87,101 @@
                     Filter
                 </button>
             </div>
+            <h2>Priorities</h2>
+            <form id="user-priority">
+                <div class="form-group row">
+                    <label for="weight_partners" class="col-xs-5 col-form-label">Proximity of restaurants</label>
+                    <div class="col-xs-7">
+                        <input class="form-control" type="number" value="1" id="weight_partners">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="weight_population" class="col-xs-5 col-form-label">Population density</label>
+                    <div class="col-xs-7">
+                        <input class="form-control" type="number" value="2" id="weight_population">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="weight_income" class="col-xs-5 col-form-label">Population income</label>
+                    <div class="col-xs-7">
+                        <input class="form-control" type="number" value="3" id="weight_income">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="weight_crime" class="col-xs-5 col-form-label">Crimes in the neighborhood</label>
+                    <div class="col-xs-7">
+                        <input class="form-control" type="number" value="4" id="weight_crime">
+                    </div>
+                </div>
+                <div class="span4 center-block">
+                    <button type="button" class="btn btn-success center-block" style="width: 100%" onclick="highlight(this)">
+                        Highlight locations
+                    </button>
+                </div>
+            </form>
+            <br>
         </div>
     </div>
 </div>
 
 <script>
-    var map = L.map('map').setView([33.748995, -84.387982], 12);
+    var map, restaurants, allRestaurantLayer, currentLayer;
 
-    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
-        maxZoom: 16,
-        id: 'mapbox.streets'
-    }).addTo(map);
+    $(document).ready(function () {
+        map = L.map('map').setView([33.748995, -84.387982], 12);
 
-    var geojsonMarkerOptions = {
-        radius: 5,
-        fillColor: "teal",
-        color: "teal",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.1
-    };
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
+            maxZoom: 16,
+            id: 'mapbox.streets'
+        }).addTo(map);
 
-    var restaurants, allRestaurantLayer, currentLayer;
-    $.get('/restaurants').done(function (data) {
-        restaurants = data;
-        allRestaurantLayer = L.geoJSON(restaurants, {
-            pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, geojsonMarkerOptions);
+        var geojsonMarkerOptions = {
+            radius: 5,
+            fillColor: "teal",
+            color: "teal",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.1
+        };
+
+{#        $.get('/restaurants').done(function (data) {#}
+{#            restaurants = data;#}
+{#            allRestaurantLayer = L.geoJSON(restaurants, {#}
+{#                pointToLayer: function (feature, latlng) {#}
+{#                    return L.circleMarker(latlng, geojsonMarkerOptions);#}
+{#                }#}
+{#            });#}
+{#            currentLayer = allRestaurantLayer;#}
+{#            currentLayer.addTo(map);#}
+{#            console.log(restaurants);#}
+{#        });#}
+
+        $.get('/categories').done(function (data) {
+            var $cuisines = $('#cuisines');
+            $cuisines.select2();
+
+            for (var region in data) {
+                var $region = $("<optgroup label=\"" + region + "\"></optgroup>");
+                $cuisines.append($region);
+                data[region].forEach(function (category) {
+                    $region.append("<option value=\"" + category + "\">" + category + "</option>");
+                });
             }
         });
-        currentLayer = allRestaurantLayer;
-        currentLayer.addTo(map);
-        console.log(restaurants);
     });
+
+    function getSelectedPriceCategories() {
+        var $checked = $("input[name=pricerange]:checked");
+        var $unchecked = $("input[name=pricerange]:not(:checked)");
+        var visibility = {};
+        $checked.each(function (_, category) {
+            visibility[category.value] = true;
+        });
+        $unchecked.each(function (_, category) {
+            visibility[category.value] = false;
+        });
+        return visibility;
+    }
 
     function filter() {
         map.removeLayer(currentLayer);
@@ -138,31 +200,22 @@
         currentLayer.addTo(map);
     }
 
-    function getSelectedPriceCategories() {
-        var $checked = $("input[name=pricerange]:checked");
-        var $unchecked = $("input[name=pricerange]:not(:checked)");
-        var visibility = {};
-        $checked.each(function (_, category) {
-            visibility[category.value] = true;
+    function highlight(element) {
+        var $form = $(element).closest("form");
+        var priorities = {
+            partner: $form.find("#weight_partners").val(),
+            population: $form.find("#weight_population").val(),
+            income: $form.find("#weight_income").val(),
+            crime: $form.find("#weight_crime").val()
+        };
+
+        $.post({
+            url: '/highlight',
+            contentType: 'application/json',
+            data: JSON.stringify(priorities)
         });
-        $unchecked.each(function (_, category) {
-            visibility[category.value] = false;
-        });
-        return visibility;
     }
 
-    $.get('/categories').done(function (data) {
-        var $cuisines = $('#cuisines');
-        $cuisines.select2();
-
-        for (var region in data) {
-            var $region = $("<optgroup label=\"" + region + "\"></optgroup>");
-            $cuisines.append($region);
-            data[region].forEach(function (category) {
-                $region.append("<option value=\"" + category + "\">" + category + "</option>");
-            });
-        }
-    });
 
 </script>
 
