@@ -69,24 +69,22 @@ def highlight(request):
         count_competitors()
 
     def score():
+        def get_ranges():
+            def calculate_range(attribute_name):
+                max_val = eval_pts.aggregate(Max(attribute_name)).get(attribute_name + '__max')
+                min_val = eval_pts.aggregate(Min(attribute_name)).get(attribute_name + '__min')
+                return max_val - min_val
+
+            eval_pts = EvaluationPoint.objects.all()
+            return dict([(attribute, calculate_range(attribute)) for attribute in
+                         ['income', 'population', 'crime_count_local', 'crime_count_neighborhood',
+                          'competitor_restaurant_count', 'partner_restaurant_count']])
+
         def calculate_score(weights):
-            def get_ranges():
-                def calculate_range(attribute_name):
-                    max_val = eval_pts.aggregate(Max(attribute_name)).get(attribute_name + '__max')
-                    min_val = eval_pts.aggregate(Min(attribute_name)).get(attribute_name + '__min')
-                    return max_val - min_val
-
-                return dict([(attribute, calculate_range(attribute)) for attribute in
-                             ['income', 'population', 'crime_count_local', 'crime_count_neighborhood',
-                              'competitor_restaurant_count', 'partner_restaurant_count']])
-
             def normalize(attribute_name):
                 return F(attribute_name) / ranges[attribute_name]
 
-            eval_pts = EvaluationPoint.objects.all()
-            ranges = get_ranges()
             w1, w2, w3, w4, w5, w6 = weights
-
             income_norm = normalize('income')
             population_norm = normalize('population')
             local_cr_norm = normalize('crime_count_local')
@@ -96,14 +94,12 @@ def highlight(request):
 
             score_val = w1 * income_norm + w2 * population_norm + w3 * local_cr_norm + \
                     w4 * nbhd_cr_norm + w5 * rest_count_norm + w6 * partner_rest_norm
-            print(score_val)
             return score_val
 
+        ranges = get_ranges()
         EvaluationPoint.objects.update(favorability_score=calculate_score([.1, .2, .3, .4, .2, .1]))
 
-    count_partners_and_competitors()
-    score()
-    return HttpResponse("Hello")
+    return evalgrids_view(request)
 
 
 def get_restaurants(request):

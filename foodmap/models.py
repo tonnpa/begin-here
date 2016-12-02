@@ -48,8 +48,8 @@ class EvaluationPoint(models.Model):
     favorability_score = models.FloatField(default=0)
     ct_geoid = models.CharField(max_length=11)
 
-    population = models.FloatField(null=True)
-    income = models.PositiveIntegerField(null=True)
+    population = models.FloatField(default=0)
+    income = models.PositiveIntegerField(default=0)
 
     crime_count_local = models.PositiveIntegerField(default=0)
     crime_count_neighborhood = models.PositiveIntegerField(default=0)
