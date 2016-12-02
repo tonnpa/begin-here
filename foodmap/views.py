@@ -42,7 +42,20 @@ def choropleth(request):
 
 @csrf_exempt
 def highlight(request):
-    # data = json.loads(request.body.decode("utf-8"))
+    #data = json.loads(request.body.decode('utf-8'))
+    data = eval(request.body)
+
+    # Priorities
+    p_partner = float(data['priority']['partner'])
+    p_income = float(data['priority']['income'])
+    p_crime = float(data['priority']['crime'])
+    p_population = float(data['priority']['population'])
+
+    # User filters
+    f_price = data['filter']['price']
+    f_rating = float(data['filter']['rating'])
+    f_cuisines = data['filter']['categories']
+
     # logging.error(data.keys())
 
     def count_partners_and_competitors():
@@ -51,15 +64,15 @@ def highlight(request):
             EvaluationPoint.objects.update(partner_restaurant_count=0)
 
         def count_partners():
-            # TODO parse partner filter
-            partners = Restaurant.objects.all()[:100]
+            # TO DO parse partner filter
+            partners = Restaurant.objects.filter(categor__in= partner_category))
             for restaurant in partners:
                 EvaluationPoint.objects.filter(id=restaurant.eval_pt_id).update(
                     partner_restaurant_count=F('partner_restaurant_count') + 1)
 
         def count_competitors():
-            # TODO parse competitor filter
-            competitors = Restaurant.objects.all()[100:200]
+            #parse competitor filter
+            competitors = Restaurant.objects.filter(price__in=f_price).filter(rating__gte=f_rating).filter(category__in=f_cuisines)
             for restaurant in competitors:
                 EvaluationPoint.objects.filter(id=restaurant.eval_pt_id).update(
                     competitor_restaurant_count=F('competitor_restaurant_count') + 1)
@@ -100,6 +113,13 @@ def highlight(request):
         EvaluationPoint.objects.update(favorability_score=calculate_score([.1, .2, .3, .4, .2, .1]))
 
     return evalgrids_view(request)
+
+    # print "hello"
+    # print eval(request.body)['filter']
+    # print "data"
+    # print data
+    # print "goodbye"
+    return HttpResponse(request, content_type='application/json')
 
 
 def get_restaurants(request):
