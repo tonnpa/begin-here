@@ -1,4 +1,4 @@
-## Query the number of EvalPts in each of the Census Tracts
+-- Query the number of EvalPts in each of the Census Tracts
 UPDATE foodmap_censustract
 	SET no_eval_pts = Q.counter
 	FROM
@@ -7,7 +7,7 @@ UPDATE foodmap_censustract
 			FROM (
 				SELECT location
 				FROM foodmap_evaluationpoint
-				) AS A 
+				) AS A
 			LEFT JOIN (
 				SELECT geoid, geom
 				FROM foodmap_censustract
@@ -18,11 +18,11 @@ UPDATE foodmap_censustract
 	WHERE foodmap_censustract.geoid = Q.geoid;
 
 
-## Calculate/Update the population density (per eval pt)
+-- Calculate/Update the population density (per eval pt)
 UPDATE foodmap_censustract
 	SET pop_density = population/no_eval_pts;
 
-## Query to link the EvalPts with the CensusTracts
+-- Query to link the EvalPts with the CensusTracts
 UPDATE foodmap_evaluationpoint
 	SET ct_geoid = Q.geoid
 	FROM
@@ -31,7 +31,7 @@ UPDATE foodmap_evaluationpoint
 			FROM (
 				SELECT id, location
 				FROM foodmap_evaluationpoint
-				) AS A 
+				) AS A
 			LEFT JOIN (
 				SELECT geoid, geom
 				FROM foodmap_censustract
@@ -41,18 +41,18 @@ UPDATE foodmap_evaluationpoint
 	WHERE foodmap_evaluationpoint.id = Q.id;
 
 
-## Delete census tracts outside of the targeted region
+-- Delete census tracts outside of the targeted region
 DELETE FROM foodmap_censustract WHERE no_eval_pts IS NULL;
 
 
-## Update EvaluationPoints with population and income from CensusTracts
+-- Update EvaluationPoints with population and income from CensusTracts
 UPDATE foodmap_evaluationpoint
 	SET population = pop_density,
-		income = income
+		  income = income
 	FROM foodmap_censustract WHERE foodmap_censustract.geoid = foodmap_evaluationpoint.ct_geoid;
 
 
-## Count local crimes
+-- Count local crimes
 UPDATE foodmap_evaluationpoint
 	SET crime_count_local = Q.counter
 	FROM
@@ -61,7 +61,7 @@ UPDATE foodmap_evaluationpoint
 			FROM (
 				SELECT location
 				FROM foodmap_crime
-				) AS A 
+				) AS A
 			LEFT JOIN (
 				SELECT id, poly_pts
 				FROM foodmap_evaluationpoint
@@ -72,7 +72,7 @@ UPDATE foodmap_evaluationpoint
 	WHERE foodmap_evaluationpoint.id = Q.id;
 
 
-## Count neighborhood crimes
+-- Count neighborhood crimes
 UPDATE foodmap_evaluationpoint
 	SET crime_count_neighborhood = Q.counter
 	FROM
@@ -81,7 +81,7 @@ UPDATE foodmap_evaluationpoint
 			FROM (
 				SELECT location
 				FROM foodmap_crime
-				) AS A 
+				) AS A
 			LEFT JOIN (
 				SELECT id, bigpoly_pts
 				FROM foodmap_evaluationpoint
@@ -92,7 +92,7 @@ UPDATE foodmap_evaluationpoint
 	WHERE foodmap_evaluationpoint.id = Q.id;
 
 
-## Add evaluation point ID to the restaurants
+-- Add evaluation point ID to the restaurants
 UPDATE foodmap_restaurant
 	SET eval_pt_id = Q.id
 	FROM
@@ -101,7 +101,7 @@ UPDATE foodmap_restaurant
 			FROM (
 				SELECT location, id as rest_id
 				FROM foodmap_restaurant
-				) AS A 
+				) AS A
 			LEFT JOIN (
 				SELECT id, poly_pts
 				FROM foodmap_evaluationpoint

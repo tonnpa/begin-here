@@ -1,13 +1,14 @@
 import json
 import logging
 
-from django.views.decorators.csrf import csrf_exempt
-
-from foodmap.models import Restaurant
-from django.shortcuts import render
-from .models import EvaluationPoint
+from django.db.models import F, Min, Max
 from django.core.serializers import serialize
 from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
+from .models import EvaluationPoint
+from .models import Restaurant
 
 
 # Create your views here.
@@ -41,8 +42,67 @@ def choropleth(request):
 
 @csrf_exempt
 def highlight(request):
-    data = json.loads(request.body.decode("utf-8"))
-    logging.error(data.keys())
+    # data = json.loads(request.body.decode("utf-8"))
+    # logging.error(data.keys())
+
+    def count_partners_and_competitors():
+        def reset_restaurant_count():
+            EvaluationPoint.objects.update(competitor_restaurant_count=0)
+            EvaluationPoint.objects.update(partner_restaurant_count=0)
+
+        def count_partners():
+            # TODO parse partner filter
+            partners = Restaurant.objects.all()[:100]
+            for restaurant in partners:
+                EvaluationPoint.objects.filter(id=restaurant.eval_pt_id).update(
+                    partner_restaurant_count=F('partner_restaurant_count') + 1)
+
+        def count_competitors():
+            # TODO parse competitor filter
+            competitors = Restaurant.objects.all()[100:200]
+            for restaurant in competitors:
+                EvaluationPoint.objects.filter(id=restaurant.eval_pt_id).update(
+                    competitor_restaurant_count=F('competitor_restaurant_count') + 1)
+
+        reset_restaurant_count()
+        count_partners()
+        count_competitors()
+
+    def score():
+        def calculate_score(weights):
+            def get_ranges():
+                def calculate_range(attribute_name):
+                    max_val = eval_pts.aggregate(Max(attribute_name)).get(attribute_name + '__max')
+                    min_val = eval_pts.aggregate(Min(attribute_name)).get(attribute_name + '__min')
+                    return max_val - min_val
+
+                return dict([(attribute, calculate_range(attribute)) for attribute in
+                             ['income', 'population', 'crime_count_local', 'crime_count_neighborhood',
+                              'competitor_restaurant_count', 'partner_restaurant_count']])
+
+            def normalize(attribute_name):
+                return F(attribute_name) / ranges[attribute_name]
+
+            eval_pts = EvaluationPoint.objects.all()
+            ranges = get_ranges()
+            w1, w2, w3, w4, w5, w6 = weights
+
+            income_norm = normalize('income')
+            population_norm = normalize('population')
+            local_cr_norm = normalize('crime_count_local')
+            nbhd_cr_norm = normalize('crime_count_neighborhood')
+            rest_count_norm = normalize('competitor_restaurant_count')
+            partner_rest_norm = normalize('partner_restaurant_count')
+
+            score_val = w1 * income_norm + w2 * population_norm + w3 * local_cr_norm + \
+                    w4 * nbhd_cr_norm + w5 * rest_count_norm + w6 * partner_rest_norm
+            print(score_val)
+            return score_val
+
+        EvaluationPoint.objects.update(favorability_score=calculate_score([.1, .2, .3, .4, .2, .1]))
+
+    count_partners_and_competitors()
+    score()
     return HttpResponse("Hello")
 
 

@@ -7,4 +7,3 @@ admin.site.register(Restaurant, admin.GeoModelAdmin)
 admin.site.register(Category, admin.GeoModelAdmin)
 admin.site.register(Crime, admin.GeoModelAdmin)
 admin.site.register(EvaluationPoint, admin.GeoModelAdmin)
-

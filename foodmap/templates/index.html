@@ -126,7 +126,7 @@
 </div>
 
 <script>
-    var map, restaurants, allRestaurantLayer, currentLayer;
+    var map, restaurants, allRestaurantLayer, currentLayer, geojsonMarkerOptions;
 
     $(document).ready(function () {
         map = L.map('map').setView([33.748995, -84.387982], 12);
@@ -136,7 +136,7 @@
             id: 'mapbox.streets'
         }).addTo(map);
 
-        var geojsonMarkerOptions = {
+        geojsonMarkerOptions = {
             radius: 5,
             fillColor: "teal",
             color: "teal",
@@ -145,17 +145,17 @@
             fillOpacity: 0.1
         };
 
-        {#        $.get('/restaurants').done(function (data) {#}
-        {#            restaurants = data;#}
-        {#            allRestaurantLayer = L.geoJSON(restaurants, {#}
-        {#                pointToLayer: function (feature, latlng) {#}
-        {#                    return L.circleMarker(latlng, geojsonMarkerOptions);#}
-        {#                }#}
-        {#            });#}
-        {#            currentLayer = allRestaurantLayer;#}
-        {#            currentLayer.addTo(map);#}
-        {#            console.log(restaurants);#}
-        {#        });#}
+        $.get('/restaurants').done(function (data) {
+            restaurants = data;
+            allRestaurantLayer = L.geoJSON(restaurants, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, geojsonMarkerOptions);
+                }
+            });
+            currentLayer = allRestaurantLayer;
+            currentLayer.addTo(map);
+            console.log(restaurants);
+        });
 
         $.get('/categories').done(function (data) {
             var $cuisines = $('#cuisines');
