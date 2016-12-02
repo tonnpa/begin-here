@@ -53,11 +53,12 @@
     }
 
     function gridstyle(feature) {
+        var plotProperty = feature.properties.favorability_score
         return {
-            color: getColor(feature.properties.crime_count_local),
+            color: getColor(plotProperty),
             weight: 0,
             opacity: 1,
-            fillOpacity: getOpacity(feature.properties.crime_count_local)
+            fillOpacity: getOpacity(plotProperty)
         };
     }
 

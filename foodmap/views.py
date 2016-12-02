@@ -7,11 +7,9 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
+from .models import Category
 from .models import EvaluationPoint
 from .models import Restaurant
-
-
-# Create your views here.
 
 
 def index(request):
@@ -42,46 +40,41 @@ def choropleth(request):
 
 @csrf_exempt
 def highlight(request):
-    #data = json.loads(request.body.decode('utf-8'))
     data = eval(request.body)
 
-    # Priorities
-    p_partner = float(data['priority']['partner'])
-    p_income = float(data['priority']['income'])
-    p_crime = float(data['priority']['crime'])
-    p_population = float(data['priority']['population'])
-
-    # User filters
-    f_price = data['filter']['price']
-    f_rating = float(data['filter']['rating'])
-    f_cuisines = data['filter']['categories']
-
-    # logging.error(data.keys())
-
-    def count_partners_and_competitors():
+    def count_partners_and_competitors(filters):
         def reset_restaurant_count():
             EvaluationPoint.objects.update(competitor_restaurant_count=0)
             EvaluationPoint.objects.update(partner_restaurant_count=0)
 
         def count_partners():
-            # TO DO parse partner filter
-            partners = Restaurant.objects.filter(categor__in= partner_category))
+            # TODO
+            partner_categories = ['donuts', 'cafes']
+            categories = [Category.objects.get(name=cuisine) for cuisine in partner_categories]
+            partners = Restaurant.objects.filter(categories__in=categories)
             for restaurant in partners:
                 EvaluationPoint.objects.filter(id=restaurant.eval_pt_id).update(
                     partner_restaurant_count=F('partner_restaurant_count') + 1)
 
-        def count_competitors():
-            #parse competitor filter
-            competitors = Restaurant.objects.filter(price__in=f_price).filter(rating__gte=f_rating).filter(category__in=f_cuisines)
+        def count_competitors(f_cuisines, f_price, f_rating):
+            categories = [Category.objects.get(name=cuisine) for cuisine in f_cuisines]
+            competitors = Restaurant.objects.filter(price__in=f_price).\
+                filter(rating__gte=f_rating).\
+                filter(categories__in=categories).distinct()
+
             for restaurant in competitors:
                 EvaluationPoint.objects.filter(id=restaurant.eval_pt_id).update(
                     competitor_restaurant_count=F('competitor_restaurant_count') + 1)
 
+        f_price = filters['price']
+        f_rating = filters['rating']
+        f_cuisines = filters['categories']
+
         reset_restaurant_count()
         count_partners()
-        count_competitors()
+        count_competitors(f_cuisines, f_price, f_rating)
 
-    def score():
+    def score(weights):
         def get_ranges():
             def calculate_range(attribute_name):
                 max_val = eval_pts.aggregate(Max(attribute_name)).get(attribute_name + '__max')
@@ -102,26 +95,25 @@ def highlight(request):
             population_norm = normalize('population')
             local_cr_norm = normalize('crime_count_local')
             nbhd_cr_norm = normalize('crime_count_neighborhood')
-            rest_count_norm = normalize('competitor_restaurant_count')
-            partner_rest_norm = normalize('partner_restaurant_count')
+            comptetitor_norm = normalize('competitor_restaurant_count')
+            partner_norm = normalize('partner_restaurant_count')
 
             score_val = w1 * income_norm + w2 * population_norm + w3 * local_cr_norm + \
-                    w4 * nbhd_cr_norm + w5 * rest_count_norm + w6 * partner_rest_norm
+                        w4 * nbhd_cr_norm + w5 * comptetitor_norm + w6 * partner_norm
             return score_val
 
+        # Priorities
+        p_partner = float(weights['partner'])
+        p_income = float(weights['income'])
+        p_crime = float(weights['crime'])
+        p_population = float(weights['population'])
         ranges = get_ranges()
-        EvaluationPoint.objects.update(favorability_score=calculate_score([.1, .2, .3, .4, .2, .1]))
+        EvaluationPoint.objects.update(favorability_score=calculate_score([
+            p_income, p_population, p_crime, p_crime, p_partner, p_partner]))
 
-    count_partners_and_competitors()
-    score()
+    count_partners_and_competitors(filters=data['filter'])
+    score(weights=data['priority'])
     return evalgrids_view(request)
-
-    # print "hello"
-    # print eval(request.body)['filter']
-    # print "data"
-    # print data
-    # print "goodbye"
-    return HttpResponse(request, content_type='application/json')
 
 
 def get_restaurants(request):
