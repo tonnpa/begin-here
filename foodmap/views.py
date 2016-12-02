@@ -112,6 +112,8 @@ def highlight(request):
         ranges = get_ranges()
         EvaluationPoint.objects.update(favorability_score=calculate_score([.1, .2, .3, .4, .2, .1]))
 
+    count_partners_and_competitors()
+    score()
     return evalgrids_view(request)
 
     # print "hello"
