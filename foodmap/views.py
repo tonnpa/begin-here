@@ -1,3 +1,4 @@
+from __future__ import division #fix division by integer errors
 import json
 import logging
 
@@ -85,21 +86,30 @@ def highlight(request):
             return dict([(attribute, calculate_range(attribute)) for attribute in
                          ['income', 'population', 'crime_count_local', 'crime_count_neighborhood',
                           'competitor_restaurant_count', 'partner_restaurant_count']])
+        def get_mins():
+            def calculate_minimum(attribute_name):
+                min_val = eval_pts.aggregate(Min(attribute_name)).get(attribute_name + '__min')
+                return min_val
+
+            eval_pts = EvaluationPoint.objects.all()
+            return dict([(attribute, calculate_minimum(attribute)) for attribute in
+                         ['income', 'population', 'crime_count_local', 'crime_count_neighborhood',
+                          'competitor_restaurant_count', 'partner_restaurant_count']])
 
         def calculate_score(weights):
             def normalize(attribute_name):
-                return F(attribute_name) / ranges[attribute_name]
+                return (F(attribute_name)-mins[attribute_name]) / ranges[attribute_name]
 
             w1, w2, w3, w4, w5, w6 = weights
             income_norm = normalize('income')
             population_norm = normalize('population')
             local_cr_norm = normalize('crime_count_local')
             nbhd_cr_norm = normalize('crime_count_neighborhood')
-            comptetitor_norm = normalize('competitor_restaurant_count')
+            competitor_norm = normalize('competitor_restaurant_count')
             partner_norm = normalize('partner_restaurant_count')
 
             score_val = w1 * income_norm + w2 * population_norm + w3 * local_cr_norm + \
-                        w4 * nbhd_cr_norm + w5 * comptetitor_norm + w6 * partner_norm
+                        w4 * nbhd_cr_norm + w5 * competitor_norm + w6 * partner_norm
             return score_val
 
         # Priorities
@@ -108,6 +118,7 @@ def highlight(request):
         p_crime = float(weights['crime'])
         p_population = float(weights['population'])
         ranges = get_ranges()
+        mins = get_mins()
         EvaluationPoint.objects.update(favorability_score=calculate_score([
             p_income, p_population, p_crime, p_crime, p_partner, p_partner]))
 
