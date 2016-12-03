@@ -1,4 +1,4 @@
-from __future__ import division #fix division by integer errors
+from __future__ import division  # fix division by integer errors
 import json
 import logging
 
@@ -59,8 +59,8 @@ def highlight(request):
 
         def count_competitors(f_cuisines, f_price, f_rating):
             categories = [Category.objects.get(name=cuisine) for cuisine in f_cuisines]
-            competitors = Restaurant.objects.filter(price__in=f_price).\
-                filter(rating__gte=f_rating).\
+            competitors = Restaurant.objects.filter(price__in=f_price). \
+                filter(rating__gte=f_rating). \
                 filter(categories__in=categories).distinct()
 
             for restaurant in competitors:
@@ -76,29 +76,27 @@ def highlight(request):
         count_competitors(f_cuisines, f_price, f_rating)
 
     def score(weights):
-        def get_ranges():
-            def calculate_range(attribute_name):
-                max_val = eval_pts.aggregate(Max(attribute_name)).get(attribute_name + '__max')
-                min_val = eval_pts.aggregate(Min(attribute_name)).get(attribute_name + '__min')
-                return max_val - min_val
+        def calculate_max_min(attribute_name, eval_pts):
+            max_val = eval_pts.aggregate(Max(attribute_name)).get(attribute_name + '__max')
+            min_val = eval_pts.aggregate(Min(attribute_name)).get(attribute_name + '__min')
+            return max_val, min_val
 
+        def get_parameters():
             eval_pts = EvaluationPoint.objects.all()
-            return dict([(attribute, calculate_range(attribute)) for attribute in
-                         ['income', 'population', 'crime_count_local', 'crime_count_neighborhood',
-                          'competitor_restaurant_count', 'partner_restaurant_count']])
-        def get_mins():
-            def calculate_minimum(attribute_name):
-                min_val = eval_pts.aggregate(Min(attribute_name)).get(attribute_name + '__min')
-                return min_val
+            parameters = dict()
+            parameters['range'] = dict()
+            parameters['min'] = dict()
 
-            eval_pts = EvaluationPoint.objects.all()
-            return dict([(attribute, calculate_minimum(attribute)) for attribute in
-                         ['income', 'population', 'crime_count_local', 'crime_count_neighborhood',
-                          'competitor_restaurant_count', 'partner_restaurant_count']])
+            for attribute in ['income', 'population', 'crime_count_local', 'crime_count_neighborhood',
+                              'competitor_restaurant_count', 'partner_restaurant_count']:
+                max_val, min_val = calculate_max_min(attribute, eval_pts)
+                parameters['range'][attribute] = float(max_val - min_val)
+                parameters['min'][attribute] = min_val
+            return parameters
 
-        def calculate_score(weights):
+        def calculate_score(weights, parameters):
             def normalize(attribute_name):
-                return (F(attribute_name)-mins[attribute_name]) / ranges[attribute_name]
+                return (F(attribute_name) - parameters['min'][attribute_name]) / parameters['range'][attribute_name]
 
             w1, w2, w3, w4, w5, w6 = weights
             income_norm = normalize('income')
@@ -112,15 +110,23 @@ def highlight(request):
                         w4 * nbhd_cr_norm + w5 * competitor_norm + w6 * partner_norm
             return score_val
 
-        # Priorities
+        def scale_scores_for_display():
+            eval_pts = EvaluationPoint.objects.all()
+            max_sc, min_sc = calculate_max_min('favorability_score', eval_pts)
+            EvaluationPoint.objects.update(favorability_score=
+                                           (F('favorability_score') - min_sc)/float((max_sc - min_sc)) * 100)
+
         p_partner = float(weights['partner'])
         p_income = float(weights['income'])
         p_crime = float(weights['crime'])
         p_population = float(weights['population'])
-        ranges = get_ranges()
-        mins = get_mins()
+
+        parameters = get_parameters()
+
         EvaluationPoint.objects.update(favorability_score=calculate_score([
-            p_income, p_population, p_crime, p_crime, p_partner, p_partner]))
+            p_income, p_population, p_crime, p_crime, p_partner, p_partner], parameters))
+
+        scale_scores_for_display()
 
     count_partners_and_competitors(filters=data['filter'])
     score(weights=data['priority'])
