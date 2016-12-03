@@ -244,6 +244,10 @@
                 priority: get_priorities(),
                 filter: get_filters()
             })
+        }).done(function() {
+            alert("All Done! Go see the Choropleth");
+        }).fail(function() {
+            alert("Try again...");
         });
     }
 
