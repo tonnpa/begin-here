@@ -109,3 +109,12 @@ UPDATE foodmap_restaurant
 			ON  ST_Contains(B.poly_pts, A.location)
 		) AS Q
 	WHERE foodmap_restaurant.id=Q.rest_id;
+
+
+-- Remove evaluation point that has no restaurant in its vicinity
+DELETE FROM foodmap_evaluationpoint
+  WHERE foodmap_evaluationpoint.id NOT IN (
+      SELECT foodmap_restaurant.eval_pt_id
+      FROM foodmap_restaurant
+      WHERE foodmap_restaurant.eval_pt_id IS NOT NULL
+  );

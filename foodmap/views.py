@@ -12,6 +12,8 @@ from .models import Category
 from .models import EvaluationPoint
 from .models import Restaurant
 
+import numpy as np
+
 
 def index(request):
     restaurants = Restaurant.objects.all()
@@ -133,6 +135,12 @@ def highlight(request):
     return evalgrids_view(request)
 
 
+def get_score_percentiles(request):
+    scores = [p.favorability_score for p in EvaluationPoint.objects.all()]
+    percentiles = np.percentile(scores, np.linspace(0, 100, 11)[1:-1]).tolist()
+    return HttpResponse(json.dumps(percentiles));
+
+
 def get_restaurants(request):
     restaurants = serialize('geojson', Restaurant.objects.all())
     return HttpResponse(restaurants, content_type='application/json')
@@ -218,6 +226,9 @@ def get_categories(request):
             "peruvian",
             "southern",
             "venezuelan"
-        ]
+        ],
+        "All Categories": [
+            "all",
+        ],
     }
     return HttpResponse(json.dumps(categories), content_type='application/json')

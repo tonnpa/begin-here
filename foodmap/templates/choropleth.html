@@ -30,41 +30,11 @@
 <body>
 <div id="map-canvas"></div>
 <script>
-    // 9 colors from color brewer
-    var colors = ['#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026', '#800026']
 
-    function getColor(d) {
-        return d > 90 ? colors[8] :
-                d > 80 ? colors[7] :
-                        d > 70 ? colors[6] :
-                                d > 60 ? colors[5] :
-                                        d > 50 ? colors[4] :
-                                                d > 40 ? colors[3] :
-                                                        d > 30 ? colors[2] :
-                                                                d > 19 ? colors[1] :
-                                                                        colors[0];
-    }
-
-    function getOpacity(d) {
-        opacity = d/100.0;
-        if (opacity > 0.6)
-            return 0.6;
-        return opacity;
-    }
-
-    function gridstyle(feature) {
-        var plotProperty = feature.properties.favorability_score
-        return {
-            color: getColor(plotProperty),
-            weight: 0,
-            opacity: 1,
-            fillOpacity: getOpacity(plotProperty)
-        };
-    }
-
-
-    $.get("/choropleth/data").done(function (mypols) {
-                var geoson = L.geoJSON(mypols, {style: gridstyle});
+    $(document).ready(function () {
+        $.get("/choropleth/data").done(function (mypols) {
+                var choropleth = L.geoJSON(mypols);
+                choropleth.setStyle(gridstyle);
                 var baseLayer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
                     maxZoom: 16,
                     id: 'mapbox.streets'
@@ -73,12 +43,44 @@
                 var map = new L.Map('map-canvas', {
                     center: new L.LatLng(33.748995, -84.387982),
                     zoom: 11,
-                    layers: [baseLayer, geoson]
+                    layers: [baseLayer, choropleth]
                 });
             }
-    );
+        );
 
+        // 9 colors from color brewer
+        var colors = ['#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026', '#800026']
+        {#        var colors = ['#8c510a','#bf812d','#dfc27d','#f6e8c3','#f5f5f5','#c7eae5','#80cdc1','#35978f','#01665e'];#}
 
+        function gridstyle(feature) {
+            var plotProperty = feature.properties.favorability_score;
+            return {
+                color: getColor(plotProperty),
+                weight: 0,
+                opacity: 1,
+                fillOpacity: getOpacity(plotProperty)
+            };
+        }
+
+        function getColor(d) {
+            var percentiles = [47.7724654277246, 53.6301609472846, 55.5576138781928, 56.9707542766257, 58.8778642927486, 60.6581537440519, 62.0614839824369, 65.0280824891502, 69.60197719414];
+            return d > percentiles[8] ? colors[8] :
+                d > percentiles[7] ? colors[7] :
+                    d > percentiles[6] ? colors[6] :
+                        d > percentiles[5] ? colors[5] :
+                            d > percentiles[4] ? colors[4] :
+                                d > percentiles[3] ? colors[3] :
+                                    d > percentiles[2] ? colors[2] :
+                                        d > percentiles[1] ? colors[1] : colors[0];
+        }
+
+        function getOpacity(d) {
+            var opacity = d / 100.0;
+            if (opacity > 0.6)
+                return 0.6;
+            return opacity;
+        }
+    });
 </script>
 
 </body>
