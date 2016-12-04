@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Begin    Here</title>
+    <title>Begin Here</title>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" type="image/x-icon"/>
@@ -12,12 +12,16 @@
             crossorigin="anonymous"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
     <style>
         #map {
-            height: 100%;
+            height: 88%;
             border: 2px solid darkseagreen;
         }
 
@@ -29,16 +33,24 @@
             min-width: 15em;
             text-align: right;
         }
+
+        .list-group-item {
+            display: list-item;
+        }
+
     </style>
 </head>
 <body>
 
 <div class="container-fluid" style="height: 100%">
     <div class="row" style="height: 100%">
-        <div class="col-md-8" style="height: 100%">
+        <div class="col-md-7" style="height: 100%; background-color: #3a373d">
+            <div class="row" style="height: 10%">
+                <h1 style="color: #fafafa; text-align: center; font-size: 4em">Begin Here</h1>
+            </div>
             <div id="map"></div>
         </div>
-        <div class="col-md-4" style="height: 100%">
+        <div class="col-md-5" style="height: 100%">
             <h2> Interactive Market Explorer</h2>
             <h3> Price range </h3>
             <div class="input-group">
@@ -88,37 +100,43 @@
                 </button>
             </div>
             <h2>Priorities</h2>
-            <form id="user-priority">
-                <div class="form-group row">
-                    <label for="weight_partners" class="col-xs-5 col-form-label">Proximity of restaurants</label>
-                    <div class="col-xs-7">
-                        <input class="form-control" type="number" value="1" id="weight_partners">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="weight_population" class="col-xs-5 col-form-label">Population density</label>
-                    <div class="col-xs-7">
-                        <input class="form-control" type="number" value="2" id="weight_population">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="weight_income" class="col-xs-5 col-form-label">Population income</label>
-                    <div class="col-xs-7">
-                        <input class="form-control" type="number" value="3" id="weight_income">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="weight_crime" class="col-xs-5 col-form-label">Crimes in the neighborhood</label>
-                    <div class="col-xs-7">
-                        <input class="form-control" type="number" value="4" id="weight_crime">
-                    </div>
-                </div>
-                <div class="span4 center-block">
-                    <button type="button" class="btn btn-success center-block" style="width: 100%"
-                            onclick="highlight(this)">
-                        Highlight locations
-                    </button>
-                </div>
+            <div class="col-xs-6" style="text-align: center">
+                <b>Not important</b>
+                <ul id="priorityPool" class="list-group" style="list-style: none">
+                    <li class="priority list-group-item">Proximity of restaurants</li>
+                    <li class="priority list-group-item">Population density</li>
+                    <li class="priority list-group-item">Population income</li>
+                    <li class="priority list-group-item">Crimes in the neighborhood</li>
+                </ul>
+            </div>
+            <div class="col-xs-6" style="text-align: center">
+                <b>Order of importance</b>
+                <ol id="priorityOrder" class="list-group">
+                </ol>
+            </div>
+            <div class="col-xs-12" style="text-align: center">
+                <b>How important is your first priority compared to your last priority?</b>
+            </div>
+            <div class="btn-group" data-toggle="buttons" style="width: 100%">
+                <label class="btn btn-secondary active" style="background-color: #96c0d8; border: solid; border-width: 1px">
+                    <input type="radio" name="priorities" id="option1" autocomplete="off" checked> Equally important
+                </label>
+                <label class="btn btn-secondary" style="background-color: #96c0d8; border: solid; border-width: 1px">
+                    <input type="radio" name="priorities" id="option2" autocomplete="off"> Somewhat more important
+                </label>
+                <label class="btn btn-secondary" style="background-color: #96c0d8; border: solid; border-width: 1px">
+                    <input type="radio" name="priorities" id="option3" autocomplete="off"> More important
+                </label>
+                <label class="btn btn-secondary" style="background-color: #96c0d8; border: solid; border-width: 1px">
+                    <input type="radio" name="priorities" id="option4" autocomplete="off"> Significantly more important
+                </label>
+            </div>
+            <div class="span4 center-block">
+                <button type="button" class="btn btn-success center-block" style="width: 100%"
+                        onclick="highlight(this)">
+                    Highlight locations
+                </button>
+            </div>
             </form>
             <br>
         </div>
@@ -172,7 +190,6 @@
             });
             currentLayer = allRestaurantLayer;
             currentLayer.addTo(map);
-            console.log(restaurants);
         });
 
         $.get('/categories').done(function (data) {
@@ -205,7 +222,7 @@
         return [visibility, de_emph];
     }
 
-    function getPrices() {vi
+    function getPrices() {
         var prices = [];
         var $checked = $("input[name=pricerange]:checked");
         $checked.each(function (_, category) {
@@ -225,7 +242,6 @@
     function filter() {
         map.removeLayer(currentLayer);
         var selectedPriceCategories = getSelectedPriceCategories()[0];
-        console.log(selectedPriceCategories)
         currentLayer = L.geoJSON(restaurants, {
             pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, geojsonMarkerOptionsfilt_emph);
@@ -238,9 +254,10 @@
         });
 
 
-        if(DeEmphLayer !== undefined && DeEmphLayer !== null) { map.removeLayer(DeEmphLayer) }
+        if (DeEmphLayer !== undefined && DeEmphLayer !== null) {
+            map.removeLayer(DeEmphLayer)
+        }
         var DeselectedPriceCategories = getSelectedPriceCategories()[1];
-        console.log(DeselectedPriceCategories)
         var DeEmphLayer = L.geoJSON(restaurants, {
             pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, geojsonMarkerOptionsfilt_de_emph);
@@ -278,15 +295,23 @@
             url: '/highlight',
             contentType: 'application/json',
             data: JSON.stringify({
-                priority: get_priorities(),
+                rankings: get_priorities(),
+                power: 0,
                 filter: get_filters()
             })
-        }).done(function() {
+        }).done(function () {
             alert("All Done! Go see the Choropleth");
-        }).fail(function() {
+        }).fail(function () {
             alert("Try again...");
         });
     }
+
+    $(".priority").click(function () {
+        var $priority = $(this);
+        $priority.fadeOut("fast", function () {
+            $priority.appendTo($("#priorityOrder")).fadeIn("fast");
+        });
+    });
 
 
 </script>
