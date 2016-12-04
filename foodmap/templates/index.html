@@ -40,7 +40,7 @@
 
     </style>
 </head>
-<body>
+<body onload="uncheck()">
 
 <div class="container-fluid" style="height: 100%">
     <div class="row" style="height: 100%">
@@ -156,8 +156,8 @@
 
         geojsonMarkerOptions = {
             radius: 5,
-            fillColor: "teal",
-            color: "teal",
+            fillColor: "#386cb0",
+            color: "#386cb0",
             weight: 1,
             opacity: 1,
             fillOpacity: 0.1
@@ -165,10 +165,10 @@
 
         geojsonMarkerOptionsfilt_emph = {
             radius: 5,
-            fillColor: "red",
-            color: "red",
+            fillColor: "#e41a1c",
+            color: "#e41a1c",
             weight: 1,
-            opacity: 0.5,
+            opacity: 0.3,
             fillOpacity: 0.3
         };
 
@@ -190,6 +190,7 @@
             });
             currentLayer = allRestaurantLayer;
             currentLayer.addTo(map);
+            console.log(restaurants);
         });
 
         $.get('/categories').done(function (data) {
@@ -242,6 +243,7 @@
     function filter() {
         map.removeLayer(currentLayer);
         var selectedPriceCategories = getSelectedPriceCategories()[0];
+        console.log(selectedPriceCategories)
         currentLayer = L.geoJSON(restaurants, {
             pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, geojsonMarkerOptionsfilt_emph);
@@ -258,6 +260,7 @@
             map.removeLayer(DeEmphLayer)
         }
         var DeselectedPriceCategories = getSelectedPriceCategories()[1];
+        console.log(DeselectedPriceCategories)
         var DeEmphLayer = L.geoJSON(restaurants, {
             pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, geojsonMarkerOptionsfilt_de_emph);
