@@ -46,6 +46,7 @@ class EvaluationPoint(models.Model):
     poly_pts = models.PolygonField(srid=4269)
     bigpoly_pts = models.PolygonField(srid=4269, null=True)
     favorability_score = models.FloatField(default=0)
+    favorability_percentile = models.FloatField(default=0)
     ct_geoid = models.CharField(max_length=11)
 
     population = models.FloatField(default=0)

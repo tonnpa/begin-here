@@ -145,6 +145,24 @@
             fillOpacity: 0.1
         };
 
+        geojsonMarkerOptionsfilt_emph = {
+            radius: 5,
+            fillColor: "red",
+            color: "red",
+            weight: 1,
+            opacity: 0.5,
+            fillOpacity: 0.3
+        };
+
+        geojsonMarkerOptionsfilt_de_emph = {
+            radius: 5,
+            fillColor: "grey",
+            color: "grey",
+            weight: 1,
+            opacity: 0.5,
+            fillOpacity: 0.2
+        };
+
         $.get('/restaurants').done(function (data) {
             restaurants = data;
             allRestaurantLayer = L.geoJSON(restaurants, {
@@ -175,16 +193,19 @@
         var $checked = $("input[name=pricerange]:checked");
         var $unchecked = $("input[name=pricerange]:not(:checked)");
         var visibility = {};
+        var de_emph = {}
         $checked.each(function (_, category) {
             visibility[category.value] = true;
+            de_emph[category.value] = false;
         });
         $unchecked.each(function (_, category) {
             visibility[category.value] = false;
+            de_emph[category.value] = true;
         });
-        return visibility;
+        return [visibility, de_emph];
     }
 
-    function getPrices() {
+    function getPrices() {vi
         var prices = [];
         var $checked = $("input[name=pricerange]:checked");
         $checked.each(function (_, category) {
@@ -203,10 +224,11 @@
 
     function filter() {
         map.removeLayer(currentLayer);
-        var selectedPriceCategories = getSelectedPriceCategories();
+        var selectedPriceCategories = getSelectedPriceCategories()[0];
+        console.log(selectedPriceCategories)
         currentLayer = L.geoJSON(restaurants, {
             pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, geojsonMarkerOptions);
+                return L.circleMarker(latlng, geojsonMarkerOptionsfilt_emph);
             },
             filter: function (feature, _) {
                 var matchPrice = selectedPriceCategories[feature.properties.price];
@@ -215,6 +237,21 @@
             }
         });
 
+
+        if(DeEmphLayer !== undefined && DeEmphLayer !== null) { map.removeLayer(DeEmphLayer) }
+        var DeselectedPriceCategories = getSelectedPriceCategories()[1];
+        console.log(DeselectedPriceCategories)
+        var DeEmphLayer = L.geoJSON(restaurants, {
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, geojsonMarkerOptionsfilt_de_emph);
+            },
+            filter: function (feature, _) {
+                var mismatchPrice = DeselectedPriceCategories[feature.properties.price];
+                var mismatchRating = feature.properties.rating < $("#rating").val();
+                return mismatchPrice || mismatchRating;
+            }
+        });
+        DeEmphLayer.addTo(map);
         currentLayer.addTo(map);
     }
 

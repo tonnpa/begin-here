@@ -33,7 +33,7 @@ def evalgrids_view(request):
     evalgrids_as_geojson = serialize('geojson', EvaluationPoint.objects.all(),
                                      geometry_field='poly_pts',
                                      fields=('income', 'population', 'crime_count_local', 'crime_count_neighborhood',
-                                             'favorability_score'))
+                                             'favorability_score', 'favorability_percentile'))
     return HttpResponse(evalgrids_as_geojson, content_type='application/json')
 
 
@@ -98,7 +98,10 @@ def highlight(request):
 
         def calculate_score(weights, parameters):
             def normalize(attribute_name):
-                return (F(attribute_name) - parameters['min'][attribute_name]) / parameters['range'][attribute_name]
+                if parameters['range'][attribute_name] == 0:
+                    return 0.0
+                else:
+                    return (F(attribute_name) - parameters['min'][attribute_name]) / parameters['range'][attribute_name]
 
             w1, w2, w3, w4, w5, w6 = weights
             income_norm = normalize('income')
@@ -118,6 +121,13 @@ def highlight(request):
             EvaluationPoint.objects.update(favorability_score=
                                            (F('favorability_score') - min_sc)/float((max_sc - min_sc)) * 100)
 
+        def calculate_percentiles():
+            ordered_pts = EvaluationPoint.objects.all().order_by('favorability_score')
+            no_pts = ordered_pts.count()
+            for num, point in enumerate(ordered_pts):
+                point.favorability_percentile = num / no_pts * 100
+                point.save()
+
         p_partner = float(weights['partner'])
         p_income = float(weights['income'])
         p_crime = float(weights['crime'])
@@ -129,6 +139,8 @@ def highlight(request):
             p_income, p_population, p_crime, p_crime, p_partner, p_partner], parameters))
 
         scale_scores_for_display()
+        calculate_percentiles()
+
 
     count_partners_and_competitors(filters=data['filter'])
     score(weights=data['priority'])
@@ -136,8 +148,7 @@ def highlight(request):
 
 
 def get_score_percentiles(request):
-    scores = [p.favorability_score for p in EvaluationPoint.objects.all()]
-    percentiles = np.percentile(scores, np.linspace(0, 100, 11)[1:-1]).tolist()
+
     return HttpResponse(json.dumps(percentiles));
 
 

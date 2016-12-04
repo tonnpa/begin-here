@@ -98,6 +98,17 @@ def load_restaurants():
             restaurant.categories.add(models.Category.objects.get(name=category))
 
 
+def load_common_category_for_restuarants():
+    try:
+        cat_all = models.Category.objects.get(name='all')
+    except models.Category.DoesNotExist:
+        cat_all = models.Category(name='all')
+        cat_all.save()
+
+    for restaurant in models.Restaurant.objects.all():
+        restaurant.categories.add(cat_all)
+
+
 def load_eval_pts():
     evalpts_df = pd.read_csv(os.path.join(BASE_DIR, 'data', 'evaluation_points.csv'))
     for point in evalpts_df.itertuples():

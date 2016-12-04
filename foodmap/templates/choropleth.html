@@ -53,7 +53,7 @@
         {#        var colors = ['#8c510a','#bf812d','#dfc27d','#f6e8c3','#f5f5f5','#c7eae5','#80cdc1','#35978f','#01665e'];#}
 
         function gridstyle(feature) {
-            var plotProperty = feature.properties.favorability_score;
+            var plotProperty = feature.properties.favorability_percentile;
             return {
                 color: getColor(plotProperty),
                 weight: 0,
@@ -63,7 +63,8 @@
         }
 
         function getColor(d) {
-            var percentiles = [47.7724654277246, 53.6301609472846, 55.5576138781928, 56.9707542766257, 58.8778642927486, 60.6581537440519, 62.0614839824369, 65.0280824891502, 69.60197719414];
+            console.log(d)
+            var percentiles = [10., 20., 30., 40., 50., 60., 70., 80., 90.];
             return d > percentiles[8] ? colors[8] :
                 d > percentiles[7] ? colors[7] :
                     d > percentiles[6] ? colors[6] :
@@ -78,7 +79,7 @@
             var opacity = d / 100.0;
             if (opacity > 0.6)
                 return 0.6;
-            return opacity;
+            return 0.8;
         }
     });
 </script>
