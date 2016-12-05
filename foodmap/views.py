@@ -1,7 +1,6 @@
 from __future__ import division  # fix division by integer errors
 
 import json
-import logging
 
 from django.core.serializers import serialize
 from django.db.models import F, Min, Max
@@ -48,14 +47,14 @@ def highlight(request):
             EvaluationPoint.objects.update(partner_restaurant_count=0)
 
         def count_partners(partner_categories):
-            categories = [Category.objects.get(name=cuisine) for cuisine in partner_categories]
+            categories = [Category.objects.get(id=cat_id) for cat_id in partner_categories]
             partners = Restaurant.objects.filter(categories__in=categories)
             for restaurant in partners:
                 EvaluationPoint.objects.filter(id=restaurant.eval_pt_id).update(
                     partner_restaurant_count=F('partner_restaurant_count') + 1)
 
         def count_competitors(f_cuisines, f_price, rating_low, rating_high):
-            categories = [Category.objects.get(name=cuisine) for cuisine in f_cuisines]
+            categories = [Category.objects.get(id=cuisine_id) for cuisine_id in f_cuisines]
             competitors = Restaurant.objects.filter(price__in=f_price). \
                 filter(rating__gte=rating_low). \
                 filter(rating__lte=rating_high). \
@@ -122,9 +121,6 @@ def highlight(request):
             competitor_norm = normalize('competitor_restaurant_count')
             partner_norm = normalize('partner_restaurant_count')
 
-            print"w1, w2 w3,....w4"
-            print(w1,w2,w3,w4,w5,w6)
-
             score_val = w1 * income_norm + w2 * population_norm + w3 * local_cr_norm + \
                         w4 * nbhd_cr_norm + w5 * competitor_norm + w6 * partner_norm
             return score_val
@@ -142,15 +138,14 @@ def highlight(request):
                 point.favorability_percentile = num / no_pts * 100
                 point.save()
 
-        crime_region_weight = [16 / 17., 1 / 17.] # So that local crimes are weighted 2x as much as neighborhood crime
+        crime_region_weight = [16 / 17., 1 / 17.]  # So that local crimes are weighted 2x as much as neighborhood crime
 
         p_competitor = float(weights['competitor'])
         p_partner = float(weights['partner'])
         p_income = float(weights['income'])
-        p_crime_local = float(weights['crime'])*crime_region_weight[0]
-        p_crime_nbhd = float(weights['crime'])*crime_region_weight[1]
+        p_crime_local = float(weights['crime']) * crime_region_weight[0]
+        p_crime_nbhd = float(weights['crime']) * crime_region_weight[1]
         p_population = float(weights['population'])
-
 
         parameters = get_parameters()
 
@@ -172,88 +167,70 @@ def get_restaurants(request):
 
 
 def get_categories(request):
-    logging.error('')
-    categories = {
-        "African": [
-            "senegalese",
-            "southafrican"
-        ],
-        "Asian": [
-            "bangladeshi",
-            "burmese",
-            "cantonese",
-            "chinese",
-            "dimsum",
-            "himalayan",
-            "indonesian",
-            "indpak",
-            "japanese",
-            "korean",
-            "laotian",
-            "malaysian",
-            "mediterranean",
-            "mongolian",
-            "noodles",
-            "pakistani",
-            "ramen",
-            "sushi",
-            "szechuan",
-            "taiwanese",
-            "vietnamese"
-        ],
-        "European": [
-            "belgian",
-            "british",
-            "creperies",
-            "ethiopian",
-            "french",
-            "german",
-            "greek",
-            "hungarian",
-            "irish",
-            "italian",
-            "russian",
-            "scandinavian",
-            "spanish",
-            "tapas"
-        ],
-        "Fast Food": [
-            "burgers",
-            "cafes",
-            "chicken_wings",
-            "donuts",
-            "falafel",
-            "hotdog",
-            "hotdogs",
-            "pizza",
-            "sandwiches",
-            "tacos",
-            "waffles"
-        ],
-        "Latin American": [
-            "caribbean",
-            "cuban",
-            "dominican",
-            "hawaiian",
-            "latin",
-            "mexican",
-            "puertorican"
-        ],
-        "Middle-East": [
-            "lebanese",
-            "moroccan",
-            "persian",
-            "turkish"
-        ],
-        "South American": [
-            "brazilian",
-            "colombian",
-            "peruvian",
-            "southern",
-            "venezuelan"
-        ],
-        "All Categories": [
-            "all",
-        ],
-    }
+    categories = {'All Categories': [[191, 'all']],
+                  'African': [[140, 'senegalese'],
+                              [40, 'southafrican']],
+                  'Asian': [[165, 'bangladeshi'],
+                            [112, 'burmese'],
+                            [49, 'cantonese'],
+                            [175, 'chinese'],
+                            [86, 'dimsum'],
+                            [32, 'himalayan'],
+                            [136, 'indonesian'],
+                            [162, 'indpak'],
+                            [65, 'japanese'],
+                            [114, 'korean'],
+                            [150, 'laotian'],
+                            [173, 'malaysian'],
+                            [62, 'mediterranean'],
+                            [38, 'mongolian'],
+                            [41, 'noodles'],
+                            [75, 'pakistani'],
+                            [30, 'ramen'],
+                            [141, 'sushi'],
+                            [42, 'szechuan'],
+                            [88, 'taiwanese'],
+                            [185, 'vietnamese']],
+                  'European': [[90, 'belgian'],
+                               [163, 'british'],
+                               [16, 'creperies'],
+                               [174, 'ethiopian'],
+                               [166, 'french'],
+                               [44, 'german'],
+                               [128, 'greek'],
+                               [2, 'hungarian'],
+                               [67, 'irish'],
+                               [12, 'italian'],
+                               [79, 'russian'],
+                               [23, 'scandinavian'],
+                               [138, 'spanish'],
+                               [36, 'tapas']],
+                  'Fast Food': [[17, 'burgers'],
+                                [35, 'cafes'],
+                                [52, 'chicken_wings'],
+                                [134, 'donuts'],
+                                [123, 'falafel'],
+                                [117, 'hotdog'],
+                                [51, 'hotdogs'],
+                                [69, 'pizza'],
+                                [101, 'sandwiches'],
+                                [99, 'tacos'],
+                                [137, 'waffles']],
+                  'Latin American': [[70, 'caribbean'],
+                                     [130, 'cuban'],
+                                     [106, 'dominican'],
+                                     [6, 'hawaiian'],
+                                     [33, 'latin'],
+                                     [29, 'mexican'],
+                                     [105, 'puertorican']],
+                  'Middle-East': [[60, 'lebanese'],
+                                  [147, 'moroccan'],
+                                  [71, 'persian'],
+                                  [115, 'turkish']],
+                  'South American': [[1, 'brazilian'],
+                                     [145, 'colombian'],
+                                     [164, 'peruvian'],
+                                     [57, 'southern'],
+                                     [97, 'venezuelan']]
+                  }
     return HttpResponse(json.dumps(categories), content_type='application/json')

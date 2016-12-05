@@ -277,7 +277,7 @@
             var $region = $("<optgroup label=\"" + region + "\"></optgroup>");
             $list.append($region);
             data[region].forEach(function (category) {
-                $region.append("<option value=\"" + category + "\">" + category + "</option>");
+                $region.append("<option value=\"" + category[0] + "\">" + category[1] + "</option>");
             });
         }
     }
@@ -323,19 +323,27 @@
     function filter() {
         map.removeLayer(currentLayer);
         var selectedPriceCategories = getSelectedPriceCategories()[0];
+        var ratings = getRatings();
+        var competitors = getCompetitors();
+        var partners = getPartners();
+
         currentLayer = L.geoJSON(restaurants, {
             pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, geojsonMarkerOptionsfilt_emph);
             },
             filter: function (feature, _) {
-                var ratings = getRatings();
                 var matchPrice = selectedPriceCategories[feature.properties.price];
                 var matchRatingLow = feature.properties.rating >= ratings[0];
                 var matchRatingHigh = feature.properties.rating <= ratings[1];
-                return matchPrice && matchRatingLow && matchRatingHigh;
+                var matchCompetitor = false;
+                competitors.forEach(function(competitor) {
+                    if (feature.properties.categories.indexOf(parseInt(competitor)) != -1) {
+                        matchCompetitor = true;
+                    }
+                });
+                return matchPrice && matchRatingLow && matchRatingHigh && matchCompetitor;
             }
         });
-
 
         if (DeEmphLayer !== undefined && DeEmphLayer !== null) {
             map.removeLayer(DeEmphLayer)
@@ -346,11 +354,16 @@
                 return L.circleMarker(latlng, geojsonMarkerOptionsfilt_de_emph);
             },
             filter: function (feature, _) {
-                var ratings = getRatings();
                 var mismatchPrice = DeselectedPriceCategories[feature.properties.price];
                 var mismatchRatingLow = feature.properties.rating < ratings[0];
                 var mismatchRatingHigh = feature.properties.rating > ratings[1];
-                return mismatchPrice || mismatchRatingLow || mismatchRatingHigh;
+                var mismatchCompetitor = true;
+                competitors.forEach(function(competitor) {
+                    if (feature.properties.categories.indexOf(parseInt(competitor)) != -1) {
+                        mismatchCompetitor = false;
+                    }
+                });
+                return mismatchPrice || mismatchRatingLow || mismatchRatingHigh || mismatchCompetitor;
             }
         });
         DeEmphLayer.addTo(map);
