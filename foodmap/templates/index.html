@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"/>
 
     <style>
         #map {
@@ -90,10 +90,10 @@
             <h3>Rating</h3>
             <form>
                 <div>
-                    <input type="text" class="sliderValue" data-index="0" value="0" />
-                    <input type="text" class="sliderValue" data-index="1" value="5" />
+                    <input type="text" class="sliderValue" data-index="0" value="0"/>
+                    <input type="text" class="sliderValue" data-index="1" value="5"/>
                 </div>
-                <br />
+                <br/>
                 <div id="slider"></div>
             </form>
 
@@ -241,7 +241,8 @@
     }
 
     function getRatings() {
-        return [$(".sliderValue")[0].value,$(".sliderValue")[1].value];
+        var $values = $(".sliderValue");
+        return [$values[0].value, $values[1].value];
     }
 
     function getSelectedCuisines() {
@@ -256,9 +257,11 @@
                 return L.circleMarker(latlng, geojsonMarkerOptionsfilt_emph);
             },
             filter: function (feature, _) {
+                var ratings = getRatings();
+                console.log(ratings);
                 var matchPrice = selectedPriceCategories[feature.properties.price];
-                var matchRatingLow = feature.properties.rating >= $("#rating").val();
-                var matchRatingHigh = feature.properties.rating >= $("#rating").val();
+                var matchRatingLow = feature.properties.rating >= ratings[0];
+                var matchRatingHigh = feature.properties.rating <= ratings[1];
                 return matchPrice && matchRatingLow && matchRatingHigh;
             }
         });
@@ -273,9 +276,11 @@
                 return L.circleMarker(latlng, geojsonMarkerOptionsfilt_de_emph);
             },
             filter: function (feature, _) {
+                var ratings = getRatings();
                 var mismatchPrice = DeselectedPriceCategories[feature.properties.price];
-                var mismatchRating = feature.properties.rating < $("#rating").val();
-                return mismatchPrice || mismatchRating;
+                var mismatchRatingLow = feature.properties.rating < ratings[0];
+                var mismatchRatingHigh = feature.properties.rating > ratings[1];
+                return mismatchPrice || mismatchRatingLow || mismatchRatingHigh;
             }
         });
         DeEmphLayer.addTo(map);
@@ -306,7 +311,7 @@
         function get_filters() {
             return {
                 price: getPrices(),
-                rating: getRating(),
+                rating: getRatings(),
                 categories: getSelectedCuisines()
             };
         }
@@ -335,29 +340,29 @@
 
     //On page reload uncheck all checkboxes
     function uncheck() {
-    // Uncheck all checkboxes on page load
-    $(':checkbox:checked').prop('checked',false);
+        // Uncheck all checkboxes on page load
+        $(':checkbox:checked').prop('checked', false);
     }
 
-    $(document).ready(function() {
-    $("#slider").slider({
-        min: 0,
-        max: 5,
-        step: .25,
-        range: true,
-        values: [0, 5],
-        slide: function(event, ui) {
-            for (var i = 0; i < ui.values.length; ++i) {
-                $("input.sliderValue[data-index=" + i + "]").val(ui.values[i]);
+    $(document).ready(function () {
+        $("#slider").slider({
+            min: 0,
+            max: 5,
+            step: .25,
+            range: true,
+            values: [0, 5],
+            slide: function (event, ui) {
+                for (var i = 0; i < ui.values.length; ++i) {
+                    $("input.sliderValue[data-index=" + i + "]").val(ui.values[i]);
+                }
             }
-        }
-    });
+        });
 
-    $("input.sliderValue").change(function() {
-        var $this = $(this);
-        $("#slider").slider("values", $this.data("index"), $this.val());
+        $("input.sliderValue").change(function () {
+            var $this = $(this);
+            $("#slider").slider("values", $this.data("index"), $this.val());
+        });
     });
-});
 
 </script>
 
