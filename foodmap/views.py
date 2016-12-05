@@ -122,6 +122,9 @@ def highlight(request):
             competitor_norm = normalize('competitor_restaurant_count')
             partner_norm = normalize('partner_restaurant_count')
 
+            print"w1, w2 w3,....w4"
+            print(w1,w2,w3,w4,w5,w6)
+
             score_val = w1 * income_norm + w2 * population_norm + w3 * local_cr_norm + \
                         w4 * nbhd_cr_norm + w5 * competitor_norm + w6 * partner_norm
             return score_val
@@ -139,15 +142,20 @@ def highlight(request):
                 point.favorability_percentile = num / no_pts * 100
                 point.save()
 
+        crime_region_weight = [16 / 17., 1 / 17.] # So that local crimes are weighted 2x as much as neighborhood crime
+
+        p_competitor = float(weights['competitor'])
         p_partner = float(weights['partner'])
         p_income = float(weights['income'])
-        p_crime = float(weights['crime'])
+        p_crime_local = float(weights['crime'])*crime_region_weight[0]
+        p_crime_nbhd = float(weights['crime'])*crime_region_weight[1]
         p_population = float(weights['population'])
+
 
         parameters = get_parameters()
 
         EvaluationPoint.objects.update(favorability_score=calculate_score([
-            p_income, p_population, p_crime, p_crime, p_partner, p_partner], parameters))
+            p_income, p_population, p_crime_local, p_crime_nbhd, p_competitor, p_partner], parameters))
 
         scale_scores_for_display()
         calculate_percentiles()
