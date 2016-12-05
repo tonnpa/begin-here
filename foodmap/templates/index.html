@@ -78,13 +78,15 @@
                 <h2> Interactive Market Explorer</h2>
             </div>
             <div class="col-xs-12">Browse the market space of restaurants by filtering on restaurant rating, price, and
-                cuisine. Click the "Filter Results" button below to see your filters applied. Restaurants that match your
-                filters will be rendered <font color="#e41a1c"><b>RED</b></font>, while those that do not match will render <font color="#808080"><b>GREY</b></font>. After filtering to include
+                cuisine. Click the "Filter Results" button below to see your filters applied. Restaurants that match
+                your
+                filters will be rendered <font color="#e41a1c"><b>RED</b></font>, while those that do not match will
+                render <font color="#808080"><b>GREY</b></font>. After filtering to include
                 all restaurants that are considered competitors, move to step 2 below.
             </div>
             <div class="row">
                 <div class="col-xs-6">
-                    <h3> Price range </h3>
+                    <h4><b>Price range</b></h4>
                     <div class="input-group">
                         <div class="span4">
                     <span class="input-group-addon">
@@ -119,7 +121,7 @@
                     </div>
                 </div>
                 <div class="col-xs-6">
-                    <h3>Yelp Rating</h3>
+                    <h4><b>Yelp Rating</b></h4>
                     <form>
                         <div>
                             <label for="ratingLowerBound">Min. rating</label>
@@ -132,6 +134,14 @@
                         <br/>
                         <div id="slider"></div>
                     </form>
+                    <h4>Competitors</h4>
+                    <div class="span4">
+                        <select id="competitors" style="width:300px" multiple="multiple"></select>
+                    </div>
+                    <h4>Complementary cuisines</h4>
+                    <div class="span4">
+                        <select id="partners" style="width:300px" multiple="multiple"></select>
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -141,20 +151,6 @@
                 <button type="button" class="btn btn-primary center-block" style="width: 100%" onclick="filter()">
                     Filter Results
                 </button>
-            </div>
-            <div class="row">
-                <div class="col-xs-6">
-                    <h3>Competitors</h3>
-                    <div class="span4">
-                        <select id="competitors" style="width:300px" multiple="multiple"></select>
-                    </div>
-                </div>
-                <div class="col-xs-6">
-                    <h3>Complementary cuisines</h3>
-                    <div class="span4">
-                        <select id="partners" style="width:300px" multiple="multiple"></select>
-                    </div>
-                </div>
             </div>
             <div class="col-xs-1">
                 <h2 style="color: #db4949">
@@ -336,7 +332,7 @@
                 var matchRatingLow = feature.properties.rating >= ratings[0];
                 var matchRatingHigh = feature.properties.rating <= ratings[1];
                 var matchCompetitor = false;
-                competitors.forEach(function(competitor) {
+                competitors.forEach(function (competitor) {
                     if (feature.properties.categories.indexOf(parseInt(competitor)) != -1) {
                         matchCompetitor = true;
                     }
@@ -358,7 +354,7 @@
                 var mismatchRatingLow = feature.properties.rating < ratings[0];
                 var mismatchRatingHigh = feature.properties.rating > ratings[1];
                 var mismatchCompetitor = true;
-                competitors.forEach(function(competitor) {
+                competitors.forEach(function (competitor) {
                     if (feature.properties.categories.indexOf(parseInt(competitor)) != -1) {
                         mismatchCompetitor = false;
                     }
