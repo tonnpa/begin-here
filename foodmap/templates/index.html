@@ -103,7 +103,8 @@
             <div class="col-xs-6" style="text-align: center">
                 <b>Not important</b>
                 <ul id="priorityPool" class="list-group" style="list-style: none">
-                    <li class="priority list-group-item">Proximity of restaurants</li>
+                    <li class="priority list-group-item">Proximity of partners</li>
+                    <li class="priority list-group-item">Proximity of competitors</li>
                     <li class="priority list-group-item">Population density</li>
                     <li class="priority list-group-item">Population income</li>
                     <li class="priority list-group-item">Crimes in the neighborhood</li>
@@ -118,17 +119,18 @@
                 <b>How important is your first priority compared to your last priority?</b>
             </div>
             <div class="btn-group" data-toggle="buttons" style="width: 100%">
-                <label class="btn btn-secondary active" style="background-color: #96c0d8; border: solid; border-width: 1px">
-                    <input type="radio" name="priorities" id="option1" autocomplete="off" checked> Equally important
+                <label class="btn btn-secondary active"
+                       style="background-color: #96c0d8; border: solid; border-width: 1px">
+                    <input type="radio" name="priorities" id="option1" value="0" checked> Equally important
                 </label>
                 <label class="btn btn-secondary" style="background-color: #96c0d8; border: solid; border-width: 1px">
-                    <input type="radio" name="priorities" id="option2" autocomplete="off"> Somewhat more important
+                    <input type="radio" name="priorities" id="option2" value="0.5"> Somewhat more important
                 </label>
                 <label class="btn btn-secondary" style="background-color: #96c0d8; border: solid; border-width: 1px">
-                    <input type="radio" name="priorities" id="option3" autocomplete="off"> More important
+                    <input type="radio" name="priorities" id="option3" value="1"> More important
                 </label>
                 <label class="btn btn-secondary" style="background-color: #96c0d8; border: solid; border-width: 1px">
-                    <input type="radio" name="priorities" id="option4" autocomplete="off"> Significantly more important
+                    <input type="radio" name="priorities" id="option4" value="2"> Significantly more important
                 </label>
             </div>
             <div class="span4 center-block">
@@ -137,7 +139,6 @@
                     Highlight locations
                 </button>
             </div>
-            </form>
             <br>
         </div>
     </div>
@@ -190,7 +191,6 @@
             });
             currentLayer = allRestaurantLayer;
             currentLayer.addTo(map);
-            console.log(restaurants);
         });
 
         $.get('/categories').done(function (data) {
@@ -243,7 +243,6 @@
     function filter() {
         map.removeLayer(currentLayer);
         var selectedPriceCategories = getSelectedPriceCategories()[0];
-        console.log(selectedPriceCategories)
         currentLayer = L.geoJSON(restaurants, {
             pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, geojsonMarkerOptionsfilt_emph);
@@ -260,7 +259,6 @@
             map.removeLayer(DeEmphLayer)
         }
         var DeselectedPriceCategories = getSelectedPriceCategories()[1];
-        console.log(DeselectedPriceCategories)
         var DeEmphLayer = L.geoJSON(restaurants, {
             pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, geojsonMarkerOptionsfilt_de_emph);
@@ -276,13 +274,24 @@
     }
 
     function highlight(element) {
-        function get_priorities() {
-            return {
-                partner: $form.find("#weight_partners").val(),
-                population: $form.find("#weight_population").val(),
-                income: $form.find("#weight_income").val(),
-                crime: $form.find("#weight_crime").val()
+        function get_ranking() {
+            var mapping = {
+                "Proximity of partners": "partner",
+                "Proximity of competitors": "competitor",
+                "Population density": "population",
+                "Population income": "income",
+                "Crimes in the neighborhood": "crime"
             };
+            var ranking = {};
+            var important_priorities = $("#priorityOrder").find(".list-group-item");
+            important_priorities.each(function (rank, item) {
+                ranking[mapping[$(item).text()]] = rank + 1;
+            });
+            var unimportant_priorities = $("#priorityPool").find(".list-group-item");
+            unimportant_priorities.each(function (_, item) {
+                ranking[mapping[$(item).text()]] = 0;
+            });
+            return ranking;
         }
 
         function get_filters() {
@@ -293,13 +302,12 @@
             };
         }
 
-        var $form = $(element).closest("form");
         $.post({
             url: '/highlight',
             contentType: 'application/json',
             data: JSON.stringify({
-                rankings: get_priorities(),
-                power: 0,
+                rankings: get_ranking(),
+                power: $("input[name=priorities]:checked").val(),
                 filter: get_filters()
             })
         }).done(function () {
@@ -315,6 +323,10 @@
             $priority.appendTo($("#priorityOrder")).fadeIn("fast");
         });
     });
+
+    function uncheck() {
+        $(":checkbox:checked").prop("checked", false);
+    }
 
 
 </script>

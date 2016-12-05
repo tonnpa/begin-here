@@ -154,20 +154,9 @@ def highlight(request):
         scale_scores_for_display()
         calculate_percentiles()
 
-
     count_partners_and_competitors(filters=data['filter'])
-
-
-    score(weights=(data))
+    score(weights=(data))  # this is where the output of calculate weights is used
     return evalgrids_view(request)
-
-
-
-
-
-def get_score_percentiles(request):
-
-    return HttpResponse(json.dumps(percentiles));
 
 
 def get_restaurants(request):
