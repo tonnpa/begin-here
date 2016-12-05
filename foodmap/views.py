@@ -58,10 +58,11 @@ def highlight(request):
                 EvaluationPoint.objects.filter(id=restaurant.eval_pt_id).update(
                     partner_restaurant_count=F('partner_restaurant_count') + 1)
 
-        def count_competitors(f_cuisines, f_price, f_rating):
+        def count_competitors(f_cuisines, f_price, rating_low, rating_high):
             categories = [Category.objects.get(name=cuisine) for cuisine in f_cuisines]
             competitors = Restaurant.objects.filter(price__in=f_price). \
-                filter(rating__gte=f_rating). \
+                filter(rating__gte=rating_low). \
+                filter(rating__lte=rating_high). \
                 filter(categories__in=categories).distinct()
 
             for restaurant in competitors:
@@ -69,12 +70,12 @@ def highlight(request):
                     competitor_restaurant_count=F('competitor_restaurant_count') + 1)
 
         f_price = filters['price']
-        f_rating = filters['rating']
+        f_rating_low, f_rating_high = filters['rating']
         f_cuisines = filters['categories']
 
         reset_restaurant_count()
         count_partners()
-        count_competitors(f_cuisines, f_price, f_rating)
+        count_competitors(f_cuisines, f_price, f_rating_low, f_rating_high)
 
     def calculate_weights(data):
         priorities = {}
