@@ -44,7 +44,6 @@ def choropleth(request):
 @csrf_exempt
 def highlight(request):
     data = eval(request.body)
-    print(data)
     def count_partners_and_competitors(filters):
         def reset_restaurant_count():
             EvaluationPoint.objects.update(competitor_restaurant_count=0)
@@ -76,6 +75,19 @@ def highlight(request):
         reset_restaurant_count()
         count_partners()
         count_competitors(f_cuisines, f_price, f_rating)
+
+    def calculate_weights(data):
+        priorities = {}
+        rankings = data['rankings']
+        keys = rankings.keys()
+        ranks = [rankings[key] for key in rankings.keys()]
+        p = float(data['power'])
+        num_priorities = float(sum([rank > 0.0 for rank in rankings.values()]))
+        numerator = [(num_priorities - rank + 1) ** p if rank > 0 else 0 for rank in ranks]
+        weights = [num / sum(numerator) for num in numerator]
+        for i in range(len(keys)):
+            priorities[keys[i]] = weights[i]
+        return priorities
 
     def score(weights):
         def calculate_max_min(attribute_name, eval_pts):
@@ -128,23 +140,12 @@ def highlight(request):
                 point.favorability_percentile = num / no_pts * 100
                 point.save()
 
-        def calculate_weights(data):
-            priorities = {}
-            rankings = data['rankings']
-            keys = rankings.keys()
-            ranks = [rankings[key] for key in rankings.keys()]
-            p = data['power']
-            num_priorities = float(sum([rank > 0.0 for rank in rankings]))
-            numerator = [(num_priorities - r + 1) ** p for r in ranks]
-            weights = [num / sum(numerator) for num in numerator]
-            for i in range(len(keys)):
-                priorities[keys[i]] = weights[i]
-            return priorities
 
         p_partner = float(weights['partner'])
         p_income = float(weights['income'])
         p_crime = float(weights['crime'])
         p_population = float(weights['population'])
+
 
         parameters = get_parameters()
 
@@ -155,7 +156,7 @@ def highlight(request):
         calculate_percentiles()
 
     count_partners_and_competitors(filters=data['filter'])
-    score(weights=(data))  # this is where the output of calculate weights is used
+    score(weights=calculate_weights(data))
     return evalgrids_view(request)
 
 
