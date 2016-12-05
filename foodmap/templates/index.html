@@ -17,6 +17,8 @@
             crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 
     <style>
         #map {
@@ -86,7 +88,14 @@
             </div>
 
             <h3>Rating</h3>
-            <input type="range" id="rating" min="1" max="5" value="1">
+            <form>
+                <div>
+                    <input type="text" class="sliderValue" data-index="0" value="0" />
+                    <input type="text" class="sliderValue" data-index="1" value="5" />
+                </div>
+                <br />
+                <div id="slider"></div>
+            </form>
 
             <h3>Restaurant Category/Cuisine</h3>
             <div class="span4">
@@ -231,8 +240,8 @@
         return prices;
     }
 
-    function getRating() {
-        return $("#rating").val();
+    function getRatings() {
+        return [$(".sliderValue")[0].value,$(".sliderValue")[1].value];
     }
 
     function getSelectedCuisines() {
@@ -248,8 +257,9 @@
             },
             filter: function (feature, _) {
                 var matchPrice = selectedPriceCategories[feature.properties.price];
-                var matchRating = feature.properties.rating >= $("#rating").val();
-                return matchPrice && matchRating;
+                var matchRatingLow = feature.properties.rating >= $("#rating").val();
+                var matchRatingHigh = feature.properties.rating >= $("#rating").val();
+                return matchPrice && matchRatingLow && matchRatingHigh;
             }
         });
 
@@ -323,10 +333,31 @@
         });
     });
 
+    //On page reload uncheck all checkboxes
     function uncheck() {
-        $(":checkbox:checked").prop("checked", false);
+    // Uncheck all checkboxes on page load
+    $(':checkbox:checked').prop('checked',false);
     }
 
+    $(document).ready(function() {
+    $("#slider").slider({
+        min: 0,
+        max: 5,
+        step: .25,
+        range: true,
+        values: [0, 5],
+        slide: function(event, ui) {
+            for (var i = 0; i < ui.values.length; ++i) {
+                $("input.sliderValue[data-index=" + i + "]").val(ui.values[i]);
+            }
+        }
+    });
+
+    $("input.sliderValue").change(function() {
+        var $this = $(this);
+        $("#slider").slider("values", $this.data("index"), $this.val());
+    });
+});
 
 </script>
 
