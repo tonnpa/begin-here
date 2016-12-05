@@ -1,5 +1,6 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     <title>Begin Here</title>
     <meta charset="utf-8"/>
@@ -21,6 +22,12 @@
     <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"/>
 
     <style>
+        #Logo {
+            height: 100%;
+            width: auto;
+            margin-left: 20%
+        }
+
         #map {
             height: 88%;
             border: 2px solid darkseagreen;
@@ -39,6 +46,16 @@
             display: list-item;
         }
 
+        .numberCircle {
+            border-radius: 70%;
+
+        {#    width: 36px;#}{#    height: 36px;#}{#    padding: 8px;#} background: #fff;
+            border: 2px solid #666;
+            color: #666;
+            text-align: center;
+        {#    vertical-align: text-bottom;#}
+        }
+
     </style>
 </head>
 <body onload="uncheck()">
@@ -47,18 +64,24 @@
     <div class="row" style="height: 100%">
         <div class="col-md-7" style="height: 100%; background-color: #3a373d">
             <div class="row" style="height: 10%">
-                <h1 style="color: #fafafa; text-align: center; font-size: 4em">Begin Here</h1>
+                <img src="{% static 'foodmap/BeginHere.png' %}" id="Logo">
             </div>
             <div id="map"></div>
         </div>
-        <div class="col-md-5" style="height: 100%"> <div></div>
+        <div class="col-md-5" style="height: 100%">
             <div class="col-xs-1">
-                 <h2>1</h2>
+                <h2 style="color: #db4949;">
+                    <b>1.</b>
+                </h2>
             </div>
             <div class="col-xs-11">
-            <h2> Interactive Market Explorer</h2>
-                </div>
-            <div>Browse the market space of restaurants by filtering on restaurant rating, price, and cuisine. When your filtering selection is complete click the "Filter Results" button below to see those restaurants. </div>
+                <h2> Interactive Market Explorer</h2>
+            </div>
+            <div class="col-xs-12">Browse the market space of restaurants by filtering on restaurant rating, price, and
+                cuisine. Click the "Filter Results" button below to see your filters applied. Restaurants that match your
+                filters will be rendered <font color="#e41a1c"><b>RED</b></font>, while those that do not match will render <font color="#808080"><b>GREY</b></font>. After filtering to include
+                all restaurants that are considered competitors, move to step 2 below.
+            </div>
             <div class="row">
                 <div class="col-xs-6">
                     <h3> Price range </h3>
@@ -133,13 +156,19 @@
                     </div>
                 </div>
             </div>
-            <div class = "col-xs-1">
-                <h2>2</h2>
+            <div class="col-xs-1">
+                <h2 style="color: #db4949">
+                    <b>2.</b>
+                </h2>
             </div>
-            <div class = "col-xs-11">
+            <div class="col-xs-11">
                 <h2>Find a Location based on Your Priorities</h2>
-        </div>
-
+            </div>
+            <div class="col-xs-12" style="padding-bottom: 20px">After filtering the market place, rank the priorities
+                below by clicking from the list on the left. When satisfied with the ranking, indicate the relative
+                importance of your criteria by clicking one of the blue boxes below. By default, any ranked criteria are
+                equally weighted and any criteria that remain "Not important" are not be considered.
+            </div>
 
             <div class="col-xs-6" style="text-align: center">
                 <b>Not important</b>
@@ -180,7 +209,7 @@
             <div class="span4 center-block">
                 <button type="button" class="btn btn-success center-block" style="width: 100%"
                         onclick="highlight(this)">
-                    Highlight your locations
+                    Highlight Your Locations
                 </button>
             </div>
         </div>
