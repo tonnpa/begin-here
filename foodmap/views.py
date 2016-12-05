@@ -1,9 +1,10 @@
 from __future__ import division  # fix division by integer errors
+
 import json
 import logging
 
-from django.db.models import F, Min, Max
 from django.core.serializers import serialize
+from django.db.models import F, Min, Max
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -11,8 +12,6 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Category
 from .models import EvaluationPoint
 from .models import Restaurant
-
-import numpy as np
 
 
 def index(request):
@@ -43,15 +42,12 @@ def choropleth(request):
 
 @csrf_exempt
 def highlight(request):
-    data = eval(request.body)
     def count_partners_and_competitors(filters):
         def reset_restaurant_count():
             EvaluationPoint.objects.update(competitor_restaurant_count=0)
             EvaluationPoint.objects.update(partner_restaurant_count=0)
 
-        def count_partners():
-            # TODO
-            partner_categories = ['donuts', 'cafes']
+        def count_partners(partner_categories):
             categories = [Category.objects.get(name=cuisine) for cuisine in partner_categories]
             partners = Restaurant.objects.filter(categories__in=categories)
             for restaurant in partners:
@@ -69,12 +65,14 @@ def highlight(request):
                 EvaluationPoint.objects.filter(id=restaurant.eval_pt_id).update(
                     competitor_restaurant_count=F('competitor_restaurant_count') + 1)
 
+        reset_restaurant_count()
+
+        f_partners = filters['partners']
+        count_partners(f_partners)
+
         f_price = filters['price']
         f_rating_low, f_rating_high = filters['rating']
-        f_cuisines = filters['categories']
-
-        reset_restaurant_count()
-        count_partners()
+        f_cuisines = filters['competitors']
         count_competitors(f_cuisines, f_price, f_rating_low, f_rating_high)
 
     def calculate_weights(data):
@@ -132,7 +130,7 @@ def highlight(request):
             eval_pts = EvaluationPoint.objects.all()
             max_sc, min_sc = calculate_max_min('favorability_score', eval_pts)
             EvaluationPoint.objects.update(favorability_score=
-                                           (F('favorability_score') - min_sc)/float((max_sc - min_sc)) * 100)
+                                           (F('favorability_score') - min_sc) / float((max_sc - min_sc)) * 100)
 
         def calculate_percentiles():
             ordered_pts = EvaluationPoint.objects.all().order_by('favorability_score')
@@ -141,12 +139,10 @@ def highlight(request):
                 point.favorability_percentile = num / no_pts * 100
                 point.save()
 
-
         p_partner = float(weights['partner'])
         p_income = float(weights['income'])
         p_crime = float(weights['crime'])
         p_population = float(weights['population'])
-
 
         parameters = get_parameters()
 
@@ -156,6 +152,7 @@ def highlight(request):
         scale_scores_for_display()
         calculate_percentiles()
 
+    data = eval(request.body)
     count_partners_and_competitors(filters=data['filter'])
     score(weights=calculate_weights(data))
     return evalgrids_view(request)
