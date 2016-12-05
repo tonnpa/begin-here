@@ -53,53 +53,71 @@
         </div>
         <div class="col-md-5" style="height: 100%">
             <h2> Interactive Market Explorer</h2>
-            <h3> Price range </h3>
-            <div class="input-group">
-                <div class="span4">
+            <div class="row">
+                <div class="col-xs-6">
+                    <h3> Price range </h3>
+                    <div class="input-group">
+                        <div class="span4">
                     <span class="input-group-addon">
                         <label for="pr1">Inexpensive $</label>
                         <input type="checkbox" name="pricerange" value="$" id="pr1">
                     </span>
-                </div>
-                <div class="span4">
+                        </div>
+                        <div class="span4">
                     <span class="input-group-addon">
                         <label for="pr2">Moderate $$</label>
                         <input type="checkbox" name="pricerange" value="$$" id="pr2">
                     </span>
-                </div>
-                <div class="span4">
+                        </div>
+                        <div class="span4">
                     <span class="input-group-addon">
                         <label for="pr3">Pricey $$$</label>
                         <input type="checkbox" name="pricerange" value="$$$" id="pr3">
                     </span>
-                </div>
-                <div class="span4">
+                        </div>
+                        <div class="span4">
                     <span class="input-group-addon">
                         <label for="pr4">Ultra High-End $$$$</label>
                         <input type="checkbox" name="pricerange" value="$$$$" id="pr4">
                     </span>
-                </div>
-                <div class="span4">
+                        </div>
+                        <div class="span4">
                     <span class="input-group-addon">
                         <label for="pr5">Not Available</label>
                         <input type="checkbox" name="pricerange" value="n/a" id="pr5">
                     </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <h3>Yelp Rating</h3>
+                    <form>
+                        <div>
+                            <label for="ratingLowerBound">Min. rating</label>
+                            <input type="text" id="ratingLowerBound" class="sliderValue" data-index="0" value="1"
+                                   style="width: 4em"/>
+                            <label for="ratingLowerBound">Max. rating</label>
+                            <input type="text" id="ratingHigherBound" class="sliderValue" data-index="1" value="5"
+                                   style="width: 4em"/>
+                        </div>
+                        <br/>
+                        <div id="slider"></div>
+                    </form>
                 </div>
             </div>
-
-            <h3>Rating</h3>
-            <form>
-                <div>
-                    <input type="text" class="sliderValue" data-index="0" value="1"/>
-                    <input type="text" class="sliderValue" data-index="1" value="5"/>
+            <div class="row">
+                <div class="col-xs-6">
+                    <h3>Competitors</h3>
+                    <div class="span4">
+                        <select id="competitors" style="width:300px" multiple="multiple"></select>
+                    </div>
                 </div>
-                <br/>
-                <div id="slider"></div>
-            </form>
-
-            <h3>Restaurant Category/Cuisine</h3>
-            <div class="span4">
-                <select id="cuisines" style="width:300px" multiple="multiple"></select>
+                <div class="col-xs-6">
+                    <h3>Complementary cuisines</h3>
+                    <div class="span4">
+                        <select id="partners" style="width:300px" multiple="multiple"></select>
+                    </div>
+                </div>
             </div>
             <br>
             <div class="span4 center-block">
@@ -126,7 +144,7 @@
             <div class="col-xs-12" style="text-align: center">
                 <b>How important is your first priority compared to your last priority?</b>
             </div>
-            <div class="btn-group" data-toggle="buttons" style="width: 100%">
+            <div class="btn-group" data-toggle="buttons" style="width: 100%; margin-left: 2%">
                 <label class="btn btn-secondary active"
                        style="background-color: #96c0d8; border: solid; border-width: 1px">
                     <input type="radio" name="priorities" id="option1" value="0" checked> Equally important
@@ -141,13 +159,15 @@
                     <input type="radio" name="priorities" id="option4" value="2"> Significantly more important
                 </label>
             </div>
+            <div style="width: 100%">
+                <br>
+            </div>
             <div class="span4 center-block">
                 <button type="button" class="btn btn-success center-block" style="width: 100%"
                         onclick="highlight(this)">
                     Highlight locations
                 </button>
             </div>
-            <br>
         </div>
     </div>
 </div>
@@ -202,24 +222,27 @@
         });
 
         $.get('/categories').done(function (data) {
-            var $cuisines = $('#cuisines');
-            $cuisines.select2();
+            populateCategories($('#competitors'), data);
+            populateCategories($("#partners"), data);
+        });
+    });
 
-            for (var region in data) {
+    function populateCategories($list, data) {
+        $list.select2();
+        for (var region in data) {
                 var $region = $("<optgroup label=\"" + region + "\"></optgroup>");
-                $cuisines.append($region);
+                $list.append($region);
                 data[region].forEach(function (category) {
                     $region.append("<option value=\"" + category + "\">" + category + "</option>");
                 });
             }
-        });
-    });
+    }
 
     function getSelectedPriceCategories() {
         var $checked = $("input[name=pricerange]:checked");
         var $unchecked = $("input[name=pricerange]:not(:checked)");
         var visibility = {};
-        var de_emph = {}
+        var de_emph = {};
         $checked.each(function (_, category) {
             visibility[category.value] = true;
             de_emph[category.value] = false;
@@ -245,8 +268,12 @@
         return [$values[0].value, $values[1].value];
     }
 
-    function getSelectedCuisines() {
-        return $("#cuisines").val();
+    function getCompetitors() {
+        return $("#competitors").val();
+    }
+
+    function getPartners() {
+        return $("#partners").val();
     }
 
     function filter() {
@@ -258,7 +285,6 @@
             },
             filter: function (feature, _) {
                 var ratings = getRatings();
-                console.log(ratings);
                 var matchPrice = selectedPriceCategories[feature.properties.price];
                 var matchRatingLow = feature.properties.rating >= ratings[0];
                 var matchRatingHigh = feature.properties.rating <= ratings[1];
@@ -312,7 +338,8 @@
             return {
                 price: getPrices(),
                 rating: getRatings(),
-                categories: getSelectedCuisines()
+                competitors: getCompetitors(),
+                partners: getPartners()
             };
         }
 
