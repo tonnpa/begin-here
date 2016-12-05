@@ -213,7 +213,8 @@
 </div>
 
 <script>
-    var map, restaurants, allRestaurantLayer, currentLayer, geojsonMarkerOptions;
+    var map, restaurants, allRestaurantLayer, currentLayer, geojsonMarkerOptions,
+        geojsonMarkerOptionsfilt_emph, geojsonMarkerOptionsfilt_de_emph, geojsonMarkerOptionsfilt_partner;
 
     $(document).ready(function () {
         map = L.map('map').setView([33.748995, -84.387982], 12);
@@ -248,6 +249,15 @@
             weight: 1,
             opacity: 0.5,
             fillOpacity: 0.2
+        };
+
+        geojsonMarkerOptionsfilt_partner = {
+            radius: 5,
+            fillColor: "green",
+            color: "green",
+            weight: 1,
+            opacity: 0.5,
+            fillOpacity: 1
         };
 
         $.get('/restaurants').done(function (data) {
@@ -342,8 +352,9 @@
         });
 
         if (DeEmphLayer !== undefined && DeEmphLayer !== null) {
-            map.removeLayer(DeEmphLayer)
+            map.removeLayer(DeEmphLayer);
         }
+
         var DeselectedPriceCategories = getSelectedPriceCategories()[1];
         var DeEmphLayer = L.geoJSON(restaurants, {
             pointToLayer: function (feature, latlng) {
@@ -362,7 +373,28 @@
                 return mismatchPrice || mismatchRatingLow || mismatchRatingHigh || mismatchCompetitor;
             }
         });
+
+        if (partnerLayer !== undefined && partnerLayer !== null) {
+            map.removeLayer(partnerLayer);
+        }
+
+        var partnerLayer = L.geoJSON(restaurants, {
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng, geojsonMarkerOptionsfilt_partner);
+            },
+            filter: function (feature, _) {
+                var matchPartner = false;
+                partners.forEach(function (partner) {
+                    if (feature.properties.categories.indexOf(parseInt(partner)) != -1) {
+                        matchPartner = true;
+                    }
+                });
+                return matchPartner;
+            }
+        });
+
         DeEmphLayer.addTo(map);
+        partnerLayer.addTo(map);
         currentLayer.addTo(map);
     }
 
