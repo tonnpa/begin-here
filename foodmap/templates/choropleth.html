@@ -43,6 +43,17 @@
         .list-group-item {
             display: list-item;
         }
+        .legend {
+    line-height: 18px;
+    color: #555;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
     </style>
 
     <title>Choropleth</title>
@@ -211,19 +222,45 @@
         });
 
         $.get("/choropleth/data").done(function (mypols) {
-                var choropleth = L.geoJSON(mypols);
-                choropleth.setStyle(gridstyle);
-                var baseLayer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
-                    maxZoom: 16,
-                    id: 'mapbox.streets'
-                });
+                    var choropleth = L.geoJSON(mypols);
+                    choropleth.setStyle(gridstyle);
+                    var baseLayer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
+                        maxZoom: 16,
+                        id: 'mapbox.streets'
+                    });
 
-                var map = new L.Map("map", {
-                    center: new L.LatLng(33.748995, -84.387982),
-                    zoom: 11,
-                    layers: [baseLayer, choropleth]
-                });
+                    var map = new L.Map("map", {
+                        center: new L.LatLng(33.748995, -84.387982),
+                        zoom: 11,
+                        layers: [baseLayer, choropleth]
+                    });
+
+
+              var legend = L.control({position: 'bottomright'});
+
+            legend.onAdd = function (map) {
+
+            var div = L.DomUtil.create('div', 'info legend'),
+                    colors = ['#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026', '#800026'],
+                    grades = ['Least Favorable', '','','','','','','','Most Favorable']
+                    ,
+                    labels = [''];
+
+            // loop through our density intervals and generate a label with a colored square for each interval
+            for (var i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                        '<i style="background:' + colors[8-i] + '"></i> <font size="3"><b>' +
+                        grades[8-i] + '</b></font><br>' ;
             }
+
+            return div;
+        };
+
+        legend.addTo(map);
+
+
+
+                }
         );
 
         $("#slider").slider({
@@ -261,14 +298,15 @@
         function getColor(d) {
             var percentiles = [10., 20., 30., 40., 50., 60., 70., 80., 90.];
             return d > percentiles[8] ? colors[8] :
-                d > percentiles[7] ? colors[7] :
-                    d > percentiles[6] ? colors[6] :
-                        d > percentiles[5] ? colors[5] :
-                            d > percentiles[4] ? colors[4] :
-                                d > percentiles[3] ? colors[3] :
-                                    d > percentiles[2] ? colors[2] :
-                                        d > percentiles[1] ? colors[1] : colors[0];
+                    d > percentiles[7] ? colors[7] :
+                            d > percentiles[6] ? colors[6] :
+                                    d > percentiles[5] ? colors[5] :
+                                            d > percentiles[4] ? colors[4] :
+                                                    d > percentiles[3] ? colors[3] :
+                                                            d > percentiles[2] ? colors[2] :
+                                                                    d > percentiles[1] ? colors[1] : colors[0];
         }
+
 
         function getOpacity(d) {
             var opacity = d / 100.0;
@@ -295,6 +333,8 @@
             });
         });
     });
+
+
 </script>
 
 </body>

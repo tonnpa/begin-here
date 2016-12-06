@@ -52,8 +52,8 @@ class EvaluationPoint(models.Model):
     population = models.FloatField(default=0)
     income = models.PositiveIntegerField(default=0)
 
-    crime_count_local = models.PositiveIntegerField(default=0)
-    crime_count_neighborhood = models.PositiveIntegerField(default=0)
+    crime_count_local = models.FloatField(default=0)
+    crime_count_neighborhood = models.FloatField(default=0)
 
     competitor_restaurant_count = models.PositiveSmallIntegerField(default=0)
     partner_restaurant_count = models.PositiveSmallIntegerField(default=0)

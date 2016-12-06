@@ -78,6 +78,7 @@ def highlight(request):
         priorities = {}
         rankings = data['rankings']
         keys = rankings.keys()
+
         ranks = [rankings[key] for key in rankings.keys()]
         p = float(data['power'])
         num_priorities = float(sum([rank > 0.0 for rank in rankings.values()]))
@@ -121,8 +122,8 @@ def highlight(request):
             competitor_norm = normalize('competitor_restaurant_count')
             partner_norm = normalize('partner_restaurant_count')
 
-            score_val = w1 * income_norm + w2 * population_norm + w3 * local_cr_norm + \
-                        w4 * nbhd_cr_norm + w5 * competitor_norm + w6 * partner_norm
+            score_val = w1 * income_norm + w2 * population_norm - w3 * local_cr_norm - \
+                        w4 * nbhd_cr_norm - w5 * competitor_norm + w6 * partner_norm
             return score_val
 
         def scale_scores_for_display():
@@ -138,8 +139,9 @@ def highlight(request):
                 point.favorability_percentile = num / no_pts * 100
                 point.save()
 
-        crime_region_weight = [16 / 17., 1 / 17.]  # So that local crimes are weighted 2x as much as neighborhood crime
+        crime_region_weight = [2 / 3., 1 / 3.]  # So that local crimes are weighted 2x as much as neighborhood crime
 
+        print(weights)
         p_competitor = float(weights['competitor'])
         p_partner = float(weights['partner'])
         p_income = float(weights['income'])

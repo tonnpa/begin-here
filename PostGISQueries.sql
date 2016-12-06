@@ -118,3 +118,17 @@ DELETE FROM foodmap_evaluationpoint
       FROM foodmap_restaurant
       WHERE foodmap_restaurant.eval_pt_id IS NOT NULL
   );
+
+-- Normalize Crime Count (1/2)
+UPDATE foodmap_evaluationpoint
+	SET crime_count_local = crime_count_local/(population),
+    crime_count_neighborhood = crime_count_neighborhood/(8*population) -- approximate population of the neighborhood
+  WHERE population>0;
+
+-- Normalize Crime Count (2/2)
+UPDATE foodmap_evaluationpoint
+SET crime_count_local = (select (avg(crime_count_local)) from foodmap_evaluationpoint Where population>0),
+  crime_count_neighborhood = (select (avg(crime_count_neighborhood)) from foodmap_evaluationpoint Where population>0)
+Where population=0;
+
+
