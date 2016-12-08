@@ -93,7 +93,7 @@ And the user should be able to access the homepage at the
 assigned port.
 
 -----------------------------
-|   3. How to Use		    |
+|   3. How to Use	    |
 -----------------------------
 
 Step 1: Copy the url generated from 
@@ -125,7 +125,7 @@ Step 4: Put http://127.0.0.1:8000/choropleth into browser
 	left panel.
 
 -----------------------------
-|   4. Demo				    |
+|   4. Demo		    |
 -----------------------------
 
 Step 1: CD to working folder, for example:
