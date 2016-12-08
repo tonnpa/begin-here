@@ -76,6 +76,17 @@ Step 2. Set up virtual environment with required packages
 Step 3. Set up the database
 	- Create the database tables
 	python manage.py migrate
+	- Populate the database tables
+
+Step 4. Populate the database
+	- Download the snapshot of our database containing
+	the model instances with cleaned and aggregated
+	attributes from:
+	
+	- Place the snapshot.json into the folder 
+		~/begin-here/foodmap/fixtures
+	- Load the data
+	python manage.py loaddata snapshot
 
 Following these steps, the web server could be started with
 	python manage.py runserver
