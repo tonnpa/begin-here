@@ -66,9 +66,11 @@
                 <h2> Interactive Market Explorer</h2>
             </div>
             <div class="col-xs-12">Browse the market space of restaurants by filtering on restaurant rating, price, and
-                cuisine. Click the "Filter Results" button below to see your filters applied. Competitor restaurants that match
+                cuisine. Click the "Filter Results" button below to see your filters applied. Competitor restaurants
+                that match
                 your filters will be rendered <font color="#e41a1c"><b>RED</b></font>, complementary restaurants will be
-                rendered in <font color="#33e9ff"><b>CYAN</b></font>, and all other restaurants will be rendered <font color="#808080"><b>GREY</b></font>. After filtering to include
+                rendered in <font color="#33e9ff"><b>CYAN</b></font>, and all other restaurants will be rendered <font
+                        color="#808080"><b>GREY</b></font>. After filtering to include
                 all restaurants that are considered competitors and complements, move to step 2 below.
             </div>
             <div class="row">
@@ -366,7 +368,7 @@
         }
 
         var partnerLayer = L.geoJSON(restaurants, {
-            pointToLayer: function(feature, latlng) {
+            pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, geojsonMarkerOptionsfilt_partner);
             },
             filter: function (feature, _) {
@@ -432,9 +434,16 @@
 
     $(".priority").click(function () {
         var $priority = $(this);
-        $priority.fadeOut("fast", function () {
-            $priority.appendTo($("#priorityOrder")).fadeIn("fast");
-        });
+        var listID = $priority.closest(".list-group").attr("id");
+        if (listID == "priorityPool") {
+            $priority.fadeOut("fast", function () {
+                $priority.appendTo($("#priorityOrder")).fadeIn("fast");
+            });
+        } else {
+            $priority.fadeOut("fast", function () {
+                $priority.appendTo($("#priorityPool")).fadeIn("fast");
+            });
+        }
     });
 
     //On page reload uncheck all checkboxes
