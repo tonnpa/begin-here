@@ -21,12 +21,6 @@ def index(request):
     return render(request, 'index.html', context)
 
 
-def heatmap(request):
-    PtData = EvaluationPoint.objects.all()
-    context = {'PtData': PtData}
-    return render(request, 'heatmap.html', context)
-
-
 def evalgrids_view(request):
     evalgrids_as_geojson = serialize('geojson', EvaluationPoint.objects.all(),
                                      geometry_field='poly_pts',

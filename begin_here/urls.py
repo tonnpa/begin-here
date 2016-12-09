@@ -20,9 +20,8 @@ from foodmap import views as foodmap_views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', foodmap_views.index),
-    url(r'^heatmap$', foodmap_views.heatmap),
-    url(r'^choropleth$', foodmap_views.choropleth), # The choropleth
-    url(r'^choropleth/data', foodmap_views.evalgrids_view), # The GeoJson evaluation grid data
+    url(r'^choropleth$', foodmap_views.choropleth),          # The choropleth
+    url(r'^choropleth/data', foodmap_views.evalgrids_view),  # The GeoJson evaluation grid data
     url(r'^categories$', foodmap_views.get_categories),
     url(r'^restaurants$', foodmap_views.get_restaurants),
     url(r'^highlight$', foodmap_views.highlight),
